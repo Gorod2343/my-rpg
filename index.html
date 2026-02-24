@@ -8,7 +8,7 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        BOT_TOKEN = "8687814579:AAEcbEDRyItXDUVW3UNJd-x4vBzYrJKHTgQ"
+        body { font-family: 'Inter', sans-serif; background-color: #0c1017; color: #f0f6fc; }
         .prosto-card { background-color: #161b22; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1.5rem; }
         .prosto-btn { background-color: #2563eb; color: white; border-radius: 1rem; transition: all 0.2s ease; }
         .prosto-btn:active { transform: scale(0.97); background-color: #1d4ed8; }
@@ -185,8 +185,6 @@
         }
         function removeHabit(id) { currentHabits = currentHabits.filter(h => h.id !== id); renderHabits(); if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); }
 
-        // --- УМНАЯ ОБРАБОТКА ОШИБОК ДЛЯ ВСЕХ ФУНКЦИЙ НИЖЕ ---
-        
         async function saveHabitsToServer(btn) {
             btn.classList.add('btn-loading'); btn.textContent = "Сохранение...";
             try {
