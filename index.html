@@ -15,9 +15,14 @@
 </head>
 <body class="bg-gray-900 text-white font-sans antialiased p-4 pb-10">
 
-    <div class="flex justify-between items-center mb-6">
+    <div id="debuff-warning" class="hidden bg-red-900/90 border border-red-500 text-white p-3 rounded-xl mb-4 shadow-lg text-center animate-pulse">
+        <p class="font-bold">⚠️ ИСТОЩЕНИЕ!</p>
+        <p class="text-sm">Здоровье ниже 30. Весь получаемый опыт снижен на 50%!</p>
+    </div>
+
+    <div class="flex justify-between items-center mb-3">
         <div class="flex items-center gap-3">
-            <div id="avatar-container" class="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center text-xl font-bold overflow-hidden border border-gray-700">
+            <div id="avatar-container" class="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center text-xl font-bold overflow-hidden border border-gray-700 shadow-lg">
                 <span id="avatar-initial">Г</span>
             </div>
             <div>
@@ -25,15 +30,24 @@
                 <p class="text-gray-400 text-xs">За все время: <span id="total-xp" class="text-white font-bold">0</span></p>
             </div>
         </div>
+        <div class="text-right">
+            <p class="text-xs text-red-400 font-bold mb-1 uppercase tracking-wider">Здоровье</p>
+            <p class="font-bold text-lg"><span id="user-hp">100</span> <span class="text-sm text-gray-500">/ 100</span></p>
+        </div>
     </div>
 
-    <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-6 mb-8 border border-gray-700 shadow-lg">
-        <p class="text-gray-400 text-sm mb-1 uppercase tracking-wider font-semibold">Этот месяц</p>
-        <div class="flex items-end gap-3 mb-2">
-            <h2 id="month-xp" class="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">0</h2>
+    <div class="w-full bg-gray-800 rounded-full h-2.5 mb-6 shadow-inner border border-gray-700 overflow-hidden">
+        <div id="hp-bar" class="bg-gradient-to-r from-red-600 to-red-400 h-2.5 rounded-full transition-all duration-500" style="width: 100%;"></div>
+    </div>
+
+    <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-6 mb-8 border border-gray-700 shadow-lg relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
+        <p class="text-gray-400 text-sm mb-1 uppercase tracking-wider font-semibold relative z-10">Этот месяц</p>
+        <div class="flex items-end gap-3 mb-2 relative z-10">
+            <h2 id="month-xp" class="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 transition-all duration-500">0</h2>
             <span class="text-gray-400 mb-2 font-bold">очков</span>
         </div>
-        <div class="mt-4 pt-4 border-t border-gray-700 flex justify-between text-sm">
+        <div class="mt-4 pt-4 border-t border-gray-700 flex justify-between text-sm relative z-10">
             <span class="text-gray-400">Прошлый месяц:</span>
             <span id="last-month-xp" class="font-bold text-white">0</span>
         </div>
@@ -41,57 +55,58 @@
 
     <h2 class="text-lg font-bold mb-4">Ежедневные привычки</h2>
 
+    <div class="bg-gray-800 rounded-2xl p-4 mb-4 border border-gray-700 shadow-md">
+        <div class="flex justify-between items-center mb-3">
+            <h4 class="font-bold text-cyan-400 flex items-center gap-2">💧 База: Вода</h4>
+            <span class="text-amber-400 text-sm font-bold">+5 Очков</span>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            <button id="btn-water" onclick="drinkWater()" class="bg-cyan-600 hover:bg-cyan-500 active:scale-95 transition-transform text-white w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-lg">
+                🥤
+            </button>
+            <div class="flex-1">
+                <div class="flex justify-between text-xs text-gray-400 mb-2 font-bold uppercase tracking-wider">
+                    <span>Прогресс</span>
+                    <span id="water-text">0 / 8 стаканов</span>
+                </div>
+                <div class="w-full bg-gray-700 rounded-full h-3">
+                    <div id="water-progress" class="bg-cyan-400 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="flex overflow-x-auto no-scrollbar gap-4 pb-2">
-        <button onclick="toggleMenu('menu-sport')" class="min-w-[140px] bg-gray-800 p-4 rounded-2xl border border-gray-700 active:scale-95 transition-transform text-left">
+        <button onclick="toggleMenu('menu-sport')" class="min-w-[140px] bg-gray-800 p-4 rounded-2xl border border-gray-700 active:scale-95 transition-transform text-left shadow-md">
             <div class="text-emerald-400 mb-2 text-2xl">🏃‍♂️</div>
             <h3 class="font-bold">Активность</h3>
         </button>
 
-        <button onclick="toggleMenu('menu-family')" class="min-w-[140px] bg-gray-800 p-4 rounded-2xl border border-gray-700 active:scale-95 transition-transform text-left">
+        <button onclick="toggleMenu('menu-family')" class="min-w-[140px] bg-gray-800 p-4 rounded-2xl border border-gray-700 active:scale-95 transition-transform text-left shadow-md">
             <div class="text-blue-400 mb-2 text-2xl">👨‍👩‍👦</div>
             <h3 class="font-bold">Семья</h3>
         </button>
-
-        <button onclick="toggleMenu('menu-rest')" class="min-w-[140px] bg-gray-800 p-4 rounded-2xl border border-gray-700 active:scale-95 transition-transform text-left">
-            <div class="text-purple-400 mb-2 text-2xl">🎮</div>
-            <h3 class="font-bold">Отдых</h3>
-        </button>
     </div>
 
-    <div id="menu-sport" class="submenu-enter bg-gray-800 rounded-2xl p-4">
+    <div id="menu-sport" class="submenu-enter bg-gray-800 rounded-2xl p-4 shadow-md">
         <h4 class="font-bold text-emerald-400 mb-3">Задачи: Активность</h4>
         <div class="space-y-3">
-            <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl">
-                <input type="checkbox" id="task-run" onclick="addXP(150, this)" class="w-6 h-6 rounded text-emerald-500 bg-gray-800 border-gray-600 focus:ring-emerald-500">
+            <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl cursor-pointer">
+                <input type="checkbox" id="task-run" onclick="addXP(150, this)" class="w-6 h-6 rounded text-emerald-500">
                 <span class="flex-1">Пробежка</span>
                 <span class="text-emerald-400 font-bold">+150</span>
             </label>
-            <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl">
-                <input type="checkbox" id="task-pushups" onclick="addXP(50, this)" class="w-6 h-6 rounded text-emerald-500 bg-gray-800 border-gray-600 focus:ring-emerald-500">
-                <span class="flex-1">Отжимания / Турник</span>
-                <span class="text-emerald-400 font-bold">+50</span>
-            </label>
         </div>
     </div>
 
-    <div id="menu-family" class="submenu-enter bg-gray-800 rounded-2xl p-4">
+    <div id="menu-family" class="submenu-enter bg-gray-800 rounded-2xl p-4 shadow-md">
         <h4 class="font-bold text-blue-400 mb-3">Задачи: Семья</h4>
         <div class="space-y-3">
-            <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl">
+            <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl cursor-pointer">
                 <input type="checkbox" id="task-kids" onclick="addXP(100, this)" class="w-6 h-6 rounded text-blue-500">
                 <span class="flex-1">Время с Витюшей и Димулей</span>
                 <span class="text-emerald-400 font-bold">+100</span>
-            </label>
-        </div>
-    </div>
-
-    <div id="menu-rest" class="submenu-enter bg-gray-800 rounded-2xl p-4">
-        <h4 class="font-bold text-purple-400 mb-3">Задачи: Отдых</h4>
-        <div class="space-y-3">
-            <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl">
-                <input type="checkbox" id="task-console" onclick="addXP(30, this)" class="w-6 h-6 rounded text-purple-500">
-                <span class="flex-1">Сыграть в приставку</span>
-                <span class="text-emerald-400 font-bold">+30</span>
             </label>
         </div>
     </div>
@@ -116,41 +131,87 @@
         }
 
         const todayDate = new Date().toDateString();
-        let savedData = JSON.parse(localStorage.getItem('rpgTasks_v2')) || { date: '', tasks: [] };
+        // В памяти теперь хранится и счетчик воды
+        let savedData = JSON.parse(localStorage.getItem('rpgTasks_v5')) || { date: '', tasks: [], waterCount: 0 };
 
         if (savedData.date !== todayDate) {
-            savedData = { date: todayDate, tasks: [] };
-            localStorage.setItem('rpgTasks_v2', JSON.stringify(savedData));
+            savedData = { date: todayDate, tasks: [], waterCount: 0 };
+            localStorage.setItem('rpgTasks_v5', JSON.stringify(savedData));
         }
 
-        function markAsDone(element) {
-            element.checked = true;
-            element.disabled = true;
-            element.parentElement.style.opacity = '0.5';
-        }
-
-        function loadSavedTasks() {
+        function loadSavedData() {
+            // Восстанавливаем галочки
             savedData.tasks.forEach(taskId => {
                 const checkbox = document.getElementById(taskId);
-                if (checkbox) markAsDone(checkbox);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    checkbox.disabled = true;
+                    checkbox.parentElement.style.opacity = '0.5';
+                }
             });
+            // Восстанавливаем воду
+            updateWaterUI();
         }
 
-        function updateUI(total_xp, current_month_xp, last_month_xp) {
+        function updateWaterUI() {
+            document.getElementById('water-text').textContent = `${savedData.waterCount} / 8 стаканов`;
+            let percent = (savedData.waterCount / 8) * 100;
+            document.getElementById('water-progress').style.width = percent + '%';
+            
+            if (savedData.waterCount >= 8) {
+                const btn = document.getElementById('btn-water');
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.innerHTML = '✅';
+            }
+        }
+
+        function updateUI(total_xp, current_month_xp, last_month_xp, hp) {
             document.getElementById('total-xp').textContent = total_xp;
-            
-            // Анимация набора цифр для красоты
-            const monthElement = document.getElementById('month-xp');
-            monthElement.textContent = current_month_xp; 
-            
+            document.getElementById('month-xp').textContent = current_month_xp; 
             document.getElementById('last-month-xp').textContent = last_month_xp;
+            
+            // Здоровье
+            document.getElementById('user-hp').textContent = hp;
+            const hpBar = document.getElementById('hp-bar');
+            hpBar.style.width = hp + '%';
+            
+            const warning = document.getElementById('debuff-warning');
+            
+            // ЛОГИКА ДЕБАФФА
+            if (hp < 30) {
+                hpBar.className = "bg-gradient-to-r from-red-700 to-red-500 h-2.5 rounded-full animate-pulse transition-all duration-500";
+                warning.classList.remove('hidden'); // Показываем тревожную табличку
+            } else {
+                hpBar.className = "bg-gradient-to-r from-red-500 to-rose-400 h-2.5 rounded-full transition-all duration-500";
+                warning.classList.add('hidden'); // Прячем табличку
+            }
         }
 
         async function loadHero() {
             try {
                 let response = await fetch(`${backendUrl}/get_hero/${username}`);
                 let data = await response.json();
-                updateUI(data.total_xp, data.current_month_xp, data.last_month_xp);
+                updateUI(data.total_xp, data.current_month_xp, data.last_month_xp, data.hp);
+            } catch (error) {
+                console.error("Ошибка сервера", error);
+            }
+        }
+
+        async function drinkWater() {
+            if (savedData.waterCount >= 8) return;
+            
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            
+            savedData.waterCount += 1;
+            localStorage.setItem('rpgTasks_v5', JSON.stringify(savedData));
+            updateWaterUI();
+            
+            // Отправляем 5 очков на сервер без отключения кнопки
+            try {
+                let response = await fetch(`${backendUrl}/add_xp/${username}?amount=5`, { method: 'POST' });
+                let data = await response.json();
+                updateUI(data.total_xp, data.current_month_xp, data.last_month_xp, data.hp);
             } catch (error) {
                 console.error("Ошибка сервера", error);
             }
@@ -158,20 +219,23 @@
 
         async function addXP(amount, element) {
             const taskId = element.id;
-            markAsDone(element);
+            element.checked = true;
+            element.disabled = true;
+            element.parentElement.style.opacity = '0.5';
+            
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
 
             if (!savedData.tasks.includes(taskId)) {
                 savedData.tasks.push(taskId);
-                localStorage.setItem('rpgTasks_v2', JSON.stringify(savedData));
+                localStorage.setItem('rpgTasks_v5', JSON.stringify(savedData));
             }
 
             try {
                 let response = await fetch(`${backendUrl}/add_xp/${username}?amount=${amount}`, { method: 'POST' });
                 let data = await response.json();
-                updateUI(data.total_xp, data.current_month_xp, data.last_month_xp);
+                updateUI(data.total_xp, data.current_month_xp, data.last_month_xp, data.hp);
             } catch (error) {
-                console.error("Ошибка сохранения опыта", error);
+                console.error("Ошибка сервера", error);
             }
         }
 
@@ -185,7 +249,7 @@
         }
 
         loadHero();
-        loadSavedTasks();
+        loadSavedData();
     </script>
 </body>
 </html>
