@@ -32,7 +32,7 @@
     </div>
 
     <div class="w-full bg-gray-800 rounded-full h-3 mb-8">
-        <div id="xp-bar" class="bg-gradient-to-r from-amber-400 to-orange-500 h-3 rounded-full" style="width: 0%" style="transition: width 0.5s ease-in-out;"></div>
+        <div id="xp-bar" class="bg-gradient-to-r from-amber-400 to-orange-500 h-3 rounded-full" style="width: 0%; transition: width 0.5s ease-in-out;"></div>
     </div>
 
     <h2 class="text-lg font-bold mb-4">Сферы жизни</h2>
@@ -63,12 +63,12 @@
         <h4 class="font-bold text-orange-500 mb-3">Задачи: Тренировка</h4>
         <div class="space-y-3">
             <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl">
-                <input type="checkbox" onclick="addXP(50, this)" class="w-5 h-5 rounded text-orange-500">
+                <input type="checkbox" id="task-pushups" onclick="addXP(50, this)" class="w-5 h-5 rounded text-orange-500">
                 <span class="flex-1">Сделать отжимания</span>
                 <span class="text-amber-400 text-sm">+50 XP</span>
             </label>
             <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl">
-                <input type="checkbox" onclick="addXP(80, this)" class="w-5 h-5 rounded text-orange-500">
+                <input type="checkbox" id="task-expander" onclick="addXP(80, this)" class="w-5 h-5 rounded text-orange-500">
                 <span class="flex-1">Упражнения с эспандером</span>
                 <span class="text-amber-400 text-sm">+80 XP</span>
             </label>
@@ -79,12 +79,12 @@
         <h4 class="font-bold text-blue-400 mb-3">Задачи: Семья</h4>
         <div class="space-y-3">
             <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl">
-                <input type="checkbox" onclick="addXP(100, this)" class="w-5 h-5 rounded text-blue-400">
+                <input type="checkbox" id="task-kids" onclick="addXP(100, this)" class="w-5 h-5 rounded text-blue-400">
                 <span class="flex-1">Время с Витюшей и Димулей</span>
                 <span class="text-amber-400 text-sm">+100 XP</span>
             </label>
             <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl">
-                <input type="checkbox" onclick="addXP(70, this)" class="w-5 h-5 rounded text-blue-400">
+                <input type="checkbox" id="task-ninja" onclick="addXP(70, this)" class="w-5 h-5 rounded text-blue-400">
                 <span class="flex-1">Ниндзя-тренировка Вити</span>
                 <span class="text-amber-400 text-sm">+70 XP</span>
             </label>
@@ -95,14 +95,19 @@
         <h4 class="font-bold text-purple-400 mb-3">Задачи: Отдых</h4>
         <div class="space-y-3">
             <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl">
-                <input type="checkbox" onclick="addXP(30, this)" class="w-5 h-5 rounded text-purple-400">
+                <input type="checkbox" id="task-console" onclick="addXP(30, this)" class="w-5 h-5 rounded text-purple-400">
                 <span class="flex-1">Поиграть в приставку</span>
                 <span class="text-amber-400 text-sm">+30 XP</span>
             </label>
             <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl">
-                <input type="checkbox" onclick="addXP(60, this)" class="w-5 h-5 rounded text-purple-400">
+                <input type="checkbox" id="task-mafia" onclick="addXP(60, this)" class="w-5 h-5 rounded text-purple-400">
                 <span class="flex-1">Сыграть партию в «Мафию»</span>
                 <span class="text-amber-400 text-sm">+60 XP</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl">
+                <input type="checkbox" id="task-horror" onclick="addXP(40, this)" class="w-5 h-5 rounded text-purple-400">
+                <span class="flex-1">Посмотреть хоррор</span>
+                <span class="text-amber-400 text-sm">+40 XP</span>
             </label>
         </div>
     </div>
@@ -111,7 +116,7 @@
         <h4 class="font-bold text-green-400 mb-3">Задачи: Быт</h4>
         <div class="space-y-3">
             <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl">
-                <input type="checkbox" onclick="addXP(20, this)" class="w-5 h-5 rounded text-green-400">
+                <input type="checkbox" id="task-morty" onclick="addXP(20, this)" class="w-5 h-5 rounded text-green-400">
                 <span class="flex-1">Спрятать обои от Морти</span>
                 <span class="text-amber-400 text-sm">+20 XP</span>
             </label>
@@ -122,7 +127,6 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
         
-        // ТВОЯ ССЫЛКА НА СЕРВЕР RENDER!
         const backendUrl = "https://rpg-backend-yg16.onrender.com";
         let username = "Гость";
 
@@ -137,37 +141,66 @@
             } else {
                 document.getElementById('avatar-initial').textContent = username.charAt(0).toUpperCase();
             }
-        } else {
-            document.getElementById('user-name').textContent = username;
         }
 
-        // Обновление цифр на экране
+        // --- ЛОГИКА ПАМЯТИ ТЕЛЕФОНА (ЕЖЕДНЕВНЫЕ КВЕСТЫ) ---
+        const todayDate = new Date().toDateString(); // Получаем сегодняшнюю дату
+        // Достаем из памяти телефона сохраненные данные (или создаем пустые, если их нет)
+        let savedData = JSON.parse(localStorage.getItem('rpgTasks')) || { date: '', tasks: [] };
+
+        // Если дата в памяти не совпадает с сегодняшней — наступил новый день! Обнуляем квесты.
+        if (savedData.date !== todayDate) {
+            savedData = { date: todayDate, tasks: [] };
+            localStorage.setItem('rpgTasks', JSON.stringify(savedData));
+        }
+
+        // Функция, которая делает задачу визуально выполненной
+        function markAsDone(element) {
+            element.checked = true;
+            element.disabled = true;
+            element.parentElement.style.opacity = '0.5';
+        }
+
+        // Применяем сохраненные галочки при загрузке
+        function loadSavedTasks() {
+            savedData.tasks.forEach(taskId => {
+                const checkbox = document.getElementById(taskId);
+                if (checkbox) markAsDone(checkbox);
+            });
+        }
+        // ---------------------------------------------------
+
         function updateUI(xp, level) {
             document.getElementById('user-level').textContent = `Уровень ${level}`;
             document.getElementById('user-xp').textContent = xp;
-            let percent = (xp / 1000) * 100; // Считаем процент заполнения шкалы (1 уровень = 1000XP)
+            let percent = (xp / 1000) * 100; 
             document.getElementById('xp-bar').style.width = `${percent}%`;
         }
 
-        // Запрашиваем данные при входе в приложение
         async function loadHero() {
             try {
                 let response = await fetch(`${backendUrl}/get_hero/${username}`);
                 let data = await response.json();
                 updateUI(data.xp, data.level);
             } catch (error) {
-                console.error("Ошибка связи с сервером", error);
+                console.error("Ошибка сервера", error);
             }
         }
 
-        // Отправляем выполненное задание на сервер
         async function addXP(amount, element) {
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-            
-            // Прячем чекбокс, чтобы нельзя было накликать 100 раз по одному заданию
-            element.parentElement.style.opacity = '0.5';
-            element.disabled = true;
+            const taskId = element.id;
 
+            // 1. Сразу делаем галочку неактивной визуально
+            markAsDone(element);
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+
+            // 2. Сохраняем это в память телефона, чтобы при обновлении страницы галочка осталась
+            if (!savedData.tasks.includes(taskId)) {
+                savedData.tasks.push(taskId);
+                localStorage.setItem('rpgTasks', JSON.stringify(savedData));
+            }
+
+            // 3. Отправляем опыт на наш Python-сервер
             try {
                 let response = await fetch(`${backendUrl}/add_xp/${username}?amount=${amount}`, { method: 'POST' });
                 let data = await response.json();
@@ -177,7 +210,6 @@
             }
         }
 
-        // Анимация меню
         function toggleMenu(menuId) {
             const allMenus = document.querySelectorAll('.submenu-enter');
             allMenus.forEach(menu => {
@@ -187,8 +219,9 @@
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
         }
 
-        // Запуск при старте!
+        // Запускаем всё при старте
         loadHero();
+        loadSavedTasks(); // Восстанавливаем галочки
     </script>
 </body>
 </html>
