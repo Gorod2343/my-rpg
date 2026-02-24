@@ -1,199 +1,55 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Life RPG</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #0c1017; color: #f0f6fc; }
-        .prosto-card { background-color: #161b22; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1.5rem; }
-        .prosto-btn { background-color: #2563eb; color: white; border-radius: 1rem; transition: all 0.2s ease; }
-        .nav-active { color: #3b82f6; background-color: rgba(255, 255, 255, 0.05); }
-        .btn-loading { opacity: 0.6; pointer-events: none; }
-        .done-task { opacity: 0.4; pointer-events: none; }
-        .accordion-content { overflow: hidden; transition: max-height 0.4s ease-in-out; max-height: 0; }
-        .chevron { transition: transform 0.3s ease; }
-        .rotate-180 { transform: rotate(180deg); }
-        #editor-modal { transition: opacity 0.3s, transform 0.3s; opacity: 0; pointer-events: none; transform: translateY(20px); }
-        #editor-modal.active { opacity: 1; pointer-events: auto; transform: translateY(0); }
-    </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Life RPG</title>
+<script src="https://cdn.tailwindcss.com"></script><script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+body{font-family:'Inter',sans-serif;background:#0c1017;color:#f0f6fc;padding:1rem;padding-bottom:7rem}
+.prosto-card{background:#161b22;border:1px solid rgba(255,255,255,0.05);border-radius:1.5rem}
+.prosto-btn{background:#2563eb;color:#fff;border-radius:1rem;transition:all .2s;width:100%;font-weight:700}
+.nav-active{color:#3b82f6;background:rgba(255,255,255,0.05)}
+.btn-loading{opacity:.6;pointer-events:none}.done-task{opacity:.4;pointer-events:none}
+.accordion-content{overflow:hidden;transition:max-height .4s ease-in-out;max-height:0}
+.chevron{transition:transform .3s}.rotate-180{transform:rotate(180deg)}
+#splash-screen{position:fixed;inset:0;background:#0c1017;z-index:9999;display:flex;align-items:center;justify-content:center}
+</style>
 </head>
-<body class="p-4 pb-28 antialiased">
-
-    <div id="splash-screen" class="fixed inset-0 bg-[#0c1017] z-[9999] flex flex-col items-center justify-center">
-        <p class="text-blue-500 font-bold animate-pulse tracking-widest uppercase">Загрузка...</p>
-    </div>
-
-    <div class="flex justify-between items-center mb-8 pt-2">
-        <div class="flex items-center gap-3">
-            <div id="avatar" class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xl">А</div>
-            <div>
-                <h1 id="user-name" class="text-lg font-bold leading-tight">...</h1>
-                <p class="text-xs text-gray-400 mt-0.5">Всего XP: <span id="total-xp" class="text-white">0</span></p>
-            </div>
-        </div>
-        <div class="text-right">
-            <div class="text-[10px] text-gray-400 font-bold uppercase mb-1">Здоровье <span id="user-hp">100</span>%</div>
-            <div class="w-24 bg-[#0c1017] h-1.5 rounded-full border border-gray-800 overflow-hidden"><div id="hp-bar" class="bg-blue-500 h-full w-full"></div></div>
-        </div>
-    </div>
-
-    <div id="tab-tasks" class="tab-content space-y-6">
-        <div class="prosto-card p-6 text-center">
-            <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">XP в этом месяце</p>
-            <h2 id="month-xp" class="text-5xl font-black text-white">0</h2>
-        </div>
-
-        <div class="prosto-card p-5">
-            <div class="flex justify-between items-center mb-4">
-                <span class="text-blue-400 text-[10px] font-bold uppercase">Гидратация</span>
-                <span id="water-text" class="text-xs font-bold text-gray-400">0 / 8 ст.</span>
-            </div>
-            <div class="flex items-center gap-4">
-                <button onclick="drinkWater(this)" class="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-xl active:scale-95 shrink-0 transition-transform">💧</button>
-                <div class="flex-1 bg-[#0c1017] h-2 rounded-full overflow-hidden border border-gray-800">
-                    <div id="water-progress" class="bg-blue-500 h-full w-0 transition-all duration-300"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="prosto-card overflow-hidden">
-            <button onclick="toggleAccordion('acc-sport', 'icon-sport')" class="w-full p-5 flex justify-between items-center"><span class="font-bold">Физическая активность</span><svg id="icon-sport" class="w-5 h-5 chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-            <div id="acc-sport" class="accordion-content bg-[#0c1017]/30 border-t border-gray-800/50"><div id="list-sport" class="p-2 space-y-1"></div></div>
-        </div>
-        <div class="prosto-card overflow-hidden">
-            <button onclick="toggleAccordion('acc-family', 'icon-family')" class="w-full p-5 flex justify-between items-center"><span class="font-bold">Отношения</span><svg id="icon-family" class="w-5 h-5 chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-            <div id="acc-family" class="accordion-content bg-[#0c1017]/30 border-t border-gray-800/50"><div id="list-family" class="p-2 space-y-1"></div></div>
-        </div>
-
-        <button onclick="openEditor()" class="w-full text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-4">⚙️ Настроить свои привычки</button>
-    </div>
-
-    <div id="tab-calc" class="tab-content hidden space-y-6">
-        <h2 class="text-2xl font-black text-center mt-4">Биометрия</h2>
-        <div class="prosto-card p-6 space-y-5">
-            <div class="grid grid-cols-2 gap-4">
-                <div><label class="text-[10px] uppercase font-bold text-gray-400 block mb-2">Рост (см)</label><input type="number" id="calc-height" class="w-full bg-[#0c1017] border border-gray-800 rounded-xl p-3 text-white outline-none focus:border-blue-500" placeholder="180"></div>
-                <div><label class="text-[10px] uppercase font-bold text-gray-400 block mb-2">Вес (кг)</label><input type="number" id="calc-weight" class="w-full bg-[#0c1017] border border-gray-800 rounded-xl p-3 text-white outline-none focus:border-blue-500" placeholder="80"></div>
-            </div>
-            <div>
-                <label class="text-[10px] uppercase font-bold text-gray-400 block mb-2">Уровень активности</label>
-                <select id="calc-activity" class="w-full bg-[#0c1017] border border-gray-800 rounded-xl p-3 text-sm text-white outline-none focus:border-blue-500">
-                    <option value="30">Низкая (30 мл/кг)</option>
-                    <option value="35">Средняя (35 мл/кг)</option>
-                    <option value="40" selected>Высокая / Бег (40 мл/кг)</option>
-                </select>
-            </div>
-            <div id="bmi-res" class="hidden bg-blue-900/20 p-4 rounded-xl text-sm font-bold text-blue-400"></div>
-            <button onclick="applyWaterGoal(this)" class="w-full prosto-btn p-4 font-bold text-sm">Рассчитать и сохранить цель</button>
-        </div>
-    </div>
-
-    <div id="tab-shop" class="tab-content hidden p-4 space-y-3"></div>
-    <div id="tab-history" class="tab-content hidden p-4 space-y-2"></div>
-
-    <div id="editor-modal" class="fixed inset-0 bg-[#0c1017] z-[10000] p-4 overflow-y-auto">
-        <div class="flex justify-between items-center mb-6 pt-2"><h2 class="text-xl font-bold">Редактор</h2><button onclick="closeEditor()" class="text-gray-400">Закрыть</button></div>
-        <div id="editor-list" class="space-y-2 mb-20"></div>
-        <button onclick="saveHabitsToServer(this)" class="w-full bg-blue-600 text-white rounded-2xl p-4 font-bold fixed bottom-6 left-4 right-4 max-w-md mx-auto">Сохранить изменения</button>
-    </div>
-
-    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md bg-[#161b22]/95 backdrop-blur-xl border border-gray-800 rounded-[2rem] p-2 flex justify-around shadow-2xl z-50">
-        <button onclick="showTab('tasks')" id="nav-tasks" class="flex-1 py-3 rounded-2xl nav-active transition-all"><span class="text-[9px] font-black uppercase">Путь</span></button>
-        <button onclick="showTab('calc')" id="nav-calc" class="flex-1 py-3 rounded-2xl text-gray-500 transition-all"><span class="text-[9px] font-black uppercase">Био</span></button>
-        <button onclick="showTab('shop')" id="nav-shop" class="flex-1 py-3 rounded-2xl text-gray-500 transition-all"><span class="text-[9px] font-black uppercase">Маг</span></button>
-        <button onclick="showTab('history')" id="nav-history" class="flex-1 py-3 rounded-2xl text-gray-500 transition-all"><span class="text-[9px] font-black uppercase">Жур</span></button>
-    </div>
-
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        const backendUrl = "https://rpg-backend-yg16.onrender.com";
-        const userId = tg.initDataUnsafe?.user?.id.toString() || "guest_123";
-        const firstName = tg.initDataUnsafe?.user?.first_name || "Герой";
-
-        document.getElementById('user-name').textContent = firstName;
-        document.getElementById('avatar').textContent = firstName[0];
-
-        let currentHabits = [];
-        let completedTasksArray = [];
-
-        async function applyWaterGoal(btn) {
-            const w = parseFloat(document.getElementById('calc-weight').value);
-            const h = parseFloat(document.getElementById('calc-height').value);
-            const a = parseFloat(document.getElementById('calc-activity').value);
-            if (w > 0) {
-                localStorage.setItem('rpg_w', w); localStorage.setItem('rpg_h', h);
-                const glasses = Math.ceil((w * a) / 250);
-                btn.classList.add('btn-loading');
-                const r = await fetch(`${backendUrl}/set_water_goal/${userId}?goal=${glasses}`, {method:'POST'});
-                if (r.ok) {
-                    const data = await r.json();
-                    const bmi = (w / ((h/100)*(h/100))).toFixed(1);
-                    document.getElementById('bmi-res').classList.remove('hidden');
-                    document.getElementById('bmi-res').textContent = `ИМТ: ${bmi}. Цель установлена: ${glasses} ст.`;
-                    updateUI(data);
-                    tg.showAlert(`Цель ${glasses} стаканов сохранена навсегда!`);
-                }
-                btn.classList.remove('btn-loading');
-            }
-        }
-
-        function updateUI(data) {
-            document.getElementById('total-xp').textContent = data.total_xp;
-            document.getElementById('month-xp').textContent = data.current_month_xp;
-            document.getElementById('user-hp').textContent = data.hp;
-            document.getElementById('hp-bar').style.width = data.hp + '%';
-            document.getElementById('water-text').textContent = `${data.water_count} / ${data.water_goal} ст.`;
-            document.getElementById('water-progress').style.width = Math.min((data.water_count / data.water_goal * 100), 100) + '%';
-            
-            completedTasksArray = data.completed_tasks ? data.completed_tasks.split(',') : [];
-            currentHabits = data.custom_habits ? JSON.parse(data.custom_habits) : [
-                { id: 'task-run', cat: 'sport', tag: 'Кардио', name: 'Пробежка', xp: 150 },
-                { id: 'task-strength', cat: 'sport', tag: 'Сила', name: 'Силовая тренировка', xp: 200 },
-                { id: 'task-family-time', cat: 'family', tag: 'Связь', name: 'Время с семьей', xp: 100 }
-            ];
-            renderHabits();
-            document.getElementById('splash-screen').style.display = 'none';
-        }
-
-        function renderHabits() {
-            const listSport = document.getElementById('list-sport'); const listFamily = document.getElementById('list-family'); const editorList = document.getElementById('editor-list');
-            listSport.innerHTML = ''; listFamily.innerHTML = ''; editorList.innerHTML = '';
-            currentHabits.forEach(h => {
-                const isDone = completedTasksArray.includes(h.id);
-                const html = `<button onclick="addXP(${h.xp}, '${h.id}', '${h.name}', this)" class="w-full text-left flex items-center gap-4 p-4 rounded-xl ${isDone ? 'done-task' : 'hover:bg-white/5'} transition-all" ${isDone ? 'disabled' : ''}><div class="w-5 h-5 rounded-full border-2 ${isDone ? 'bg-blue-600 border-blue-600' : 'border-gray-600'} flex items-center justify-center text-[10px]">${isDone ? '✓' : ''}</div><div class="flex-1"><div class="text-sm font-bold text-white">${h.name}</div></div><div class="text-blue-400 font-bold text-xs">+${h.xp}</div></button>`;
-                if (h.cat === 'sport') listSport.innerHTML += html; else listFamily.innerHTML += html;
-                editorList.innerHTML += `<div class="bg-[#161b22] p-3 rounded-xl flex justify-between items-center mb-2"><span>${h.name}</span><button onclick="removeHabit('${h.id}')" class="text-red-500 text-xs font-bold">Удалить</button></div>`;
-            });
-        }
-
-        async function loadHero() { const r = await fetch(`${backendUrl}/get_hero/${userId}`); if(r.ok) updateUI(await r.json()); }
-        async function drinkWater(btn) { btn.classList.add('btn-loading'); const r = await fetch(`${backendUrl}/drink_water/${userId}`, {method:'POST'}); if(r.ok) updateUI(await r.json()); btn.classList.remove('btn-loading'); }
-        async function addXP(amt, id, name, btn) { btn.classList.add('btn-loading'); const r = await fetch(`${backendUrl}/add_xp/${userId}?amount=${amt}&task_id=${id}&task_name=${name}`, {method:'POST'}); if(r.ok) updateUI(await r.json()); btn.classList.remove('btn-loading'); }
-        function openEditor() { document.getElementById('editor-modal').classList.add('active'); }
-        function closeEditor() { document.getElementById('editor-modal').classList.remove('active'); }
-        function toggleAccordion(cid, iid) {
-            const c = document.getElementById(cid); const i = document.getElementById(iid);
-            const isO = c.style.maxHeight && c.style.maxHeight !== '0px';
-            document.querySelectorAll('.accordion-content').forEach(el => el.style.maxHeight = '0px');
-            if (!isO) { c.style.maxHeight = c.scrollHeight + "px"; i.classList.add('rotate-180'); }
-        }
-        function showTab(name) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
-            document.getElementById('tab-' + name).classList.remove('hidden');
-            document.querySelectorAll('nav button, .fixed button').forEach(b => b.classList.remove('nav-active'));
-            document.getElementById('nav-' + name).classList.add('nav-active');
-            loadHero();
-        }
-
-        if(localStorage.getItem('rpg_w')) document.getElementById('calc-weight').value = localStorage.getItem('rpg_w');
-        if(localStorage.getItem('rpg_h')) document.getElementById('calc-height').value = localStorage.getItem('rpg_h');
-
-        loadHero();
-    </script>
+<body>
+<div id="splash-screen"><p class="text-blue-500 font-bold animate-pulse">ЗАГРУЗКА...</p></div>
+<div class="flex justify-between items-center mb-8"><div class="flex items-center gap-3"><div id="avatar" class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xl">А</div><div><h1 id="user-name" class="text-lg font-bold leading-tight">...</h1><div class="flex items-center gap-2 mt-0.5"><p class="text-xs text-gray-400">XP: <span id="total-xp" class="text-white">0</span></p><div id="streak-badge" class="hidden items-center bg-orange-500/10 px-1.5 py-0.5 rounded-full border border-orange-500/20">🔥<span id="streak-count" class="text-[10px] text-orange-500 font-black ml-0.5">0</span></div></div></div></div><div class="text-right"><div class="text-[10px] text-gray-400 font-bold uppercase">HP <span id="user-hp">100</span>%</div><div class="w-24 bg-[#161b22] h-1.5 rounded-full overflow-hidden mt-1"><div id="hp-bar" class="bg-blue-500 h-full w-full"></div></div></div></div>
+<div id="tab-tasks" class="tab-content space-y-4">
+<div class="prosto-card p-6 text-center"><p class="text-gray-400 text-[10px] uppercase font-bold">Очков в месяце</p><h2 id="month-xp" class="text-5xl font-black">0</h2></div>
+<div class="prosto-card p-5"><div class="flex justify-between items-center mb-4"><span class="text-blue-400 text-[10px] font-bold uppercase">Вода</span><span id="water-text" class="text-xs font-bold text-gray-400">0/8 ст.</span></div><button onclick="drinkWater(this)" class="prosto-btn p-4 active:scale-95">ПИТЬ СТАКАН 💧</button><div class="w-full bg-[#0c1017] h-1.5 rounded-full mt-4 overflow-hidden"><div id="water-progress" class="bg-blue-500 h-full w-0 transition-all duration-300"></div></div></div>
+<div class="prosto-card overflow-hidden"><button onclick="toggleAccordion('acc-sport','icon-sport')" class="w-full p-5 flex justify-between items-center"><span class="font-bold">Активность</span><svg id="icon-sport" class="w-5 h-5 chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button><div id="acc-sport" class="accordion-content bg-[#0c1017]/30 border-t border-gray-800/50"><div id="list-sport" class="p-2 space-y-1"></div></div></div>
+<div class="prosto-card overflow-hidden"><button onclick="toggleAccordion('acc-family','icon-family')" class="w-full p-5 flex justify-between items-center"><span class="font-bold">Семья</span><svg id="icon-family" class="w-5 h-5 chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button><div id="acc-family" class="accordion-content bg-[#0c1017]/30 border-t border-gray-800/50"><div id="list-family" class="p-2 space-y-1"></div></div></div>
+<button onclick="openEditor()" class="w-full text-[10px] text-gray-500 font-bold uppercase underline mt-4">⚙️ Настроить списки</button></div>
+<div id="tab-calc" class="tab-content hidden space-y-4"><h2 class="text-2xl font-black text-center mt-4">Биометрия</h2><div class="prosto-card p-6 space-y-4"><input type="number" id="calc-height" class="w-full bg-[#0c1017] border border-gray-800 rounded-xl p-4 text-white" placeholder="Рост (см)"><input type="number" id="calc-weight" class="w-full bg-[#0c1017] border border-gray-800 rounded-xl p-4 text-white" placeholder="Вес (кг)"><div id="bmi-res" class="hidden bg-blue-900/20 p-4 rounded-xl text-sm font-bold text-blue-400"></div><button onclick="applyWaterGoal(this)" class="prosto-btn p-4">Рассчитать и сохранить</button></div></div>
+<div id="tab-shop" class="tab-content hidden p-4"></div><div id="tab-history" class="tab-content hidden p-4"></div>
+<div id="editor-modal" class="fixed inset-0 bg-[#0c1017] z-[10000] p-4 overflow-y-auto hidden">
+<div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold">Редактор</h2><button onclick="closeEditor()" class="text-gray-400 font-bold uppercase text-xs">Закрыть</button></div>
+<div class="prosto-card p-5 mb-6 space-y-3"><input type="text" id="new-h-name" placeholder="Название" class="w-full bg-[#0c1017] border border-gray-800 rounded-xl p-3 text-white"><input type="text" id="new-h-tag" placeholder="Тег" class="w-full bg-[#0c1017] border border-gray-800 rounded-xl p-3 text-white"><div class="grid grid-cols-2 gap-3"><select id="new-h-cat" class="w-full bg-[#0c1017] border border-gray-800 rounded-xl p-3 text-white"><option value="sport">Спорт</option><option value="family">Семья</option></select><input type="number" id="new-h-xp" placeholder="XP" class="w-full bg-[#0c1017] border border-gray-800 rounded-xl p-3 text-white"></div><button onclick="addNewHabit()" class="prosto-btn p-3">Добавить в список</button></div>
+<div id="editor-list" class="space-y-2 mb-20"></div><button onclick="saveHabitsToServer(this)" class="prosto-btn p-4 bg-blue-600 fixed bottom-6 left-4 right-4 max-w-md mx-auto shadow-2xl">Сохранить для профиля</button></div>
+<nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md bg-[#161b22]/95 backdrop-blur-xl border border-gray-800 rounded-[2rem] p-2 flex justify-around shadow-2xl z-50">
+<button onclick="showTab('tasks')" id="nav-tasks" class="flex-1 py-3 rounded-2xl nav-active text-[9px] font-black uppercase">Путь</button><button onclick="showTab('calc')" id="nav-calc" class="flex-1 py-3 rounded-2xl text-gray-500 text-[9px] font-black uppercase">Био</button><button onclick="showTab('shop')" id="nav-shop" class="flex-1 py-3 rounded-2xl text-gray-500 text-[9px] font-black uppercase">Маг</button><button onclick="showTab('history')" id="nav-history" class="flex-1 py-3 rounded-2xl text-gray-500 text-[9px] font-black uppercase">Жур</button></nav>
+<script>
+const tg=window.Telegram.WebApp;tg.expand();const backendUrl="https://rpg-backend-yg16.onrender.com";const userId=tg.initDataUnsafe?.user?.id.toString()||"guest_123";const firstName=tg.initDataUnsafe?.user?.first_name||"Александр";
+const reqHeaders={'Content-Type':'application/json','X-TG-Data':tg.initData||""};let currentHabits=[],completedTasksArray=[];
+document.getElementById('user-name').textContent=firstName;document.getElementById('avatar').textContent=firstName[0];
+async function applyWaterGoal(btn){const w=parseFloat(document.getElementById('calc-weight').value),h=parseFloat(document.getElementById('calc-height').value);if(w>0){btn.classList.add('btn-loading');const g=Math.ceil((w*40)/250);const r=await fetch(`${backendUrl}/set_water_goal/${userId}?goal=${g}`,{method:'POST',headers:reqHeaders});if(r.ok){const data=await r.json();document.getElementById('bmi-res').classList.remove('hidden');document.getElementById('bmi-res').textContent=`Цель: ${g} ст.`;updateUI(data);tg.showAlert(`Цель ${g} ст. сохранена!`);}btn.classList.remove('btn-loading');}}
+function updateUI(data){document.getElementById('total-xp').textContent=data.total_xp;document.getElementById('month-xp').textContent=data.current_month_xp;document.getElementById('user-hp').textContent=data.hp;document.getElementById('hp-bar').style.width=data.hp+'%';document.getElementById('water-text').textContent=`${data.water_count}/${data.water_goal} ст.`;document.getElementById('water-progress').style.width=Math.min((data.water_count/data.water_goal*100),100)+'%';if(data.streak>0){document.getElementById('streak-badge').classList.replace('hidden','flex');document.getElementById('streak-count').textContent=data.streak;}completedTasksArray=data.completed_tasks?data.completed_tasks.split(','):[];currentHabits=data.custom_habits?JSON.parse(data.custom_habits):[{id:'task-run',cat:'sport',name:'Пробежка',xp:150},{id:'task-strength',cat:'sport',name:'Силовая',xp:200},{id:'task-family',cat:'family',name:'Время с семьей',xp:100}];renderHabits();document.getElementById('splash-screen').style.display='none';}
+function renderHabits(){const s=document.getElementById('list-sport'),f=document.getElementById('list-family'),e=document.getElementById('editor-list');s.innerHTML=f.innerHTML=e.innerHTML='';currentHabits.forEach(h=>{const done=completedTasksArray.includes(h.id);const html=`<button onclick="addXP(${h.xp},'${h.id}','${h.name}',this)" class="w-full text-left flex items-center gap-4 p-4 rounded-xl ${done?'done-task':'hover:bg-white/5'}" ${done?'disabled':''}><div class="w-5 h-5 rounded-full border-2 ${done?'bg-blue-600 border-blue-600':'border-gray-600'} flex items-center justify-center text-[10px]">${done?'✓':''}</div><div class="flex-1"><div class="font-bold text-sm text-white">${h.name}</div></div><div class="text-blue-400 font-black text-xs">+${h.xp}</div></button>`;if(h.cat==='sport')s.innerHTML+=html;else f.innerHTML+=html;e.innerHTML+=`<div class="prosto-card p-4 flex justify-between mb-2"><span>${h.name}</span><button onclick="removeHabit('${h.id}')" class="text-red-500 font-bold">УДАЛИТЬ</button></div>`;});}
+async function saveHabitsToServer(btn){btn.classList.add('btn-loading');await fetch(`${backendUrl}/update_habits/${userId}`,{method:'POST',headers:reqHeaders,body:JSON.stringify({habits:JSON.stringify(currentHabits)})});closeEditor();loadHero();btn.classList.remove('btn-loading');}
+function addNewHabit(){const n=document.getElementById('new-h-name').value,t=document.getElementById('new-h-tag').value,c=document.getElementById('new-h-cat').value,x=parseInt(document.getElementById('new-h-xp').value);if(n&&x){currentHabits.push({id:'task-custom-'+Date.now(),cat:c,name:n,xp:x});renderHabits();}}
+function removeHabit(id){currentHabits=currentHabits.filter(h=>h.id!==id);renderHabits();}
+async function loadHero(){try{const r=await fetch(`${backendUrl}/get_hero/${userId}`,{headers:reqHeaders});if(r.ok)updateUI(await r.json());}catch(e){}}
+async function drinkWater(btn){btn.classList.add('btn-loading');const r=await fetch(`${backendUrl}/drink_water/${userId}`,{method:'POST',headers:reqHeaders});if(r.ok)updateUI(await r.json());btn.classList.remove('btn-loading');}
+async function addXP(a,i,n,btn){btn.classList.add('btn-loading');const r=await fetch(`${backendUrl}/add_xp/${userId}?amount=${a}&task_id=${i}&task_name=${n}`,{method:'POST',headers:reqHeaders});if(r.ok)updateUI(await r.json());btn.classList.remove('btn-loading');}
+function showTab(n){document.querySelectorAll('.tab-content').forEach(t=>t.classList.add('hidden'));document.getElementById('tab-'+n).classList.remove('hidden');document.querySelectorAll('nav button').forEach(b=>b.classList.remove('nav-active'));document.getElementById('nav-'+n).classList.add('nav-active');loadHero();}
+function toggleAccordion(c,i){const el=document.getElementById(c),ic=document.getElementById(i),open=el.style.maxHeight&&el.style.maxHeight!=='0px';document.querySelectorAll('.accordion-content').forEach(a=>a.style.maxHeight='0px');if(!open){el.style.maxHeight=el.scrollHeight+"px";ic.classList.add('rotate-180');}else ic.classList.remove('rotate-180');}
+function openEditor(){document.getElementById('editor-modal').classList.remove('hidden');}
+function closeEditor(){document.getElementById('editor-modal').classList.add('hidden');}
+loadHero();
+</script>
 </body>
 </html>
