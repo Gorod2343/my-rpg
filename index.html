@@ -3,247 +3,248 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Life Tracker</title>
+    <title>Life RPG</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .submenu-enter { max-height: 0; opacity: 0; overflow: hidden; transition: all 0.4s ease-out; }
-        .submenu-enter-active { max-height: 500px; opacity: 1; margin-top: 1rem; }
+        .tab-active { color: #34d399; border-bottom: 2px solid #34d399; }
     </style>
 </head>
-<body class="bg-gray-900 text-white font-sans antialiased p-4 pb-10">
-
-    <div id="debuff-warning" class="hidden bg-red-900/90 border border-red-500 text-white p-3 rounded-xl mb-4 shadow-lg text-center animate-pulse">
-        <p class="font-bold">⚠️ ИСТОЩЕНИЕ!</p>
-        <p class="text-sm">Здоровье ниже 30. Весь получаемый опыт снижен на 50%!</p>
-    </div>
+<body class="bg-gray-900 text-white font-sans p-4 pb-24">
 
     <div class="flex justify-between items-center mb-3">
         <div class="flex items-center gap-3">
-            <div id="avatar-container" class="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center text-xl font-bold overflow-hidden border border-gray-700 shadow-lg">
+            <div id="avatar-container" class="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center text-xl font-bold border border-gray-700 shadow-lg overflow-hidden">
                 <span id="avatar-initial">Г</span>
             </div>
             <div>
-                <h1 id="user-name" class="text-xl font-bold">Гость</h1>
-                <p class="text-gray-400 text-xs">За все время: <span id="total-xp" class="text-white font-bold">0</span></p>
+                <h1 id="user-name" class="text-xl font-bold text-white">Гость</h1>
+                <p class="text-gray-400 text-xs">Всего: <span id="total-xp" class="text-white font-bold">0</span></p>
             </div>
         </div>
         <div class="text-right">
-            <p class="text-xs text-red-400 font-bold mb-1 uppercase tracking-wider">Здоровье</p>
-            <p class="font-bold text-lg"><span id="user-hp">100</span> <span class="text-sm text-gray-500">/ 100</span></p>
+            <p class="text-xs text-red-400 font-bold uppercase tracking-wider">Здоровье</p>
+            <p class="font-bold text-lg"><span id="user-hp">100</span><span class="text-sm text-gray-500">/100</span></p>
         </div>
     </div>
 
-    <div class="w-full bg-gray-800 rounded-full h-2.5 mb-6 shadow-inner border border-gray-700 overflow-hidden">
-        <div id="hp-bar" class="bg-gradient-to-r from-red-600 to-red-400 h-2.5 rounded-full transition-all duration-500" style="width: 100%;"></div>
+    <div class="w-full bg-gray-800 rounded-full h-2 mb-6 border border-gray-700 overflow-hidden shadow-inner">
+        <div id="hp-bar" class="bg-gradient-to-r from-red-600 to-red-400 h-2 transition-all duration-500" style="width: 100%;"></div>
     </div>
 
-    <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-6 mb-8 border border-gray-700 shadow-lg relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
-        <p class="text-gray-400 text-sm mb-1 uppercase tracking-wider font-semibold relative z-10">Этот месяц</p>
-        <div class="flex items-end gap-3 mb-2 relative z-10">
-            <h2 id="month-xp" class="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 transition-all duration-500">0</h2>
-            <span class="text-gray-400 mb-2 font-bold">очков</span>
+    <div id="tab-tasks">
+        <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-6 mb-6 border border-gray-700 shadow-xl">
+            <p class="text-gray-400 text-xs uppercase font-bold tracking-widest mb-1">Доступно для покупок</p>
+            <div class="flex items-end gap-2 mb-2">
+                <h2 id="month-xp" class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">0</h2>
+                <span class="text-gray-400 mb-2 font-bold uppercase text-xs">очков</span>
+            </div>
         </div>
-        <div class="mt-4 pt-4 border-t border-gray-700 flex justify-between text-sm relative z-10">
-            <span class="text-gray-400">Прошлый месяц:</span>
-            <span id="last-month-xp" class="font-bold text-white">0</span>
-        </div>
-    </div>
 
-    <h2 class="text-lg font-bold mb-4">Ежедневные привычки</h2>
-
-    <div class="bg-gray-800 rounded-2xl p-4 mb-4 border border-gray-700 shadow-md">
-        <div class="flex justify-between items-center mb-3">
-            <h4 class="font-bold text-cyan-400 flex items-center gap-2">💧 База: Вода</h4>
-            <span class="text-amber-400 text-sm font-bold">+5 Очков</span>
+        <div class="bg-gray-800 rounded-2xl p-4 mb-6 border border-gray-700 shadow-lg">
+            <div class="flex justify-between items-center mb-3">
+                <h4 class="font-bold text-cyan-400">💧 База: Вода</h4>
+                <span class="text-emerald-400 text-xs font-bold">+5 Очков</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="btn-water" onclick="drinkWater()" class="bg-cyan-600 w-10 h-10 rounded-lg flex items-center justify-center text-lg active:scale-95 transition-transform">🥤</button>
+                <div class="flex-1">
+                    <div class="flex justify-between text-[10px] text-gray-500 uppercase font-bold mb-1">
+                        <span id="water-text">0 / 8 стаканов</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-1.5">
+                        <div id="water-progress" class="bg-cyan-400 h-1.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="flex items-center gap-3">
-            <button id="btn-water" onclick="drinkWater()" class="bg-cyan-600 hover:bg-cyan-500 active:scale-95 transition-transform text-white w-10 h-10 rounded-lg shrink-0 flex items-center justify-center text-lg shadow-md">
-                🥤
+
+        <h2 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Категории</h2>
+        <div class="grid grid-cols-2 gap-3">
+            <button onclick="toggleMenu('menu-sport')" class="bg-gray-800 p-4 rounded-2xl border border-gray-700 text-left">
+                <div class="text-2xl mb-1">🏃‍♂️</div>
+                <div class="font-bold text-sm">Активность</div>
             </button>
-            <div class="flex-1">
-                <div class="flex justify-between text-xs text-gray-400 mb-1.5 font-bold uppercase tracking-wider">
-                    <span>Прогресс</span>
-                    <span id="water-text">0 / 8 стаканов</span>
+            <button onclick="toggleMenu('menu-family')" class="bg-gray-800 p-4 rounded-2xl border border-gray-700 text-left">
+                <div class="text-2xl mb-1">👨‍👩‍👦</div>
+                <div class="font-bold text-sm">Семья</div>
+            </button>
+        </div>
+
+        <div id="menu-sport" class="hidden mt-4 space-y-2">
+            <label class="flex items-center gap-3 p-4 bg-gray-800 rounded-xl border border-gray-700">
+                <input type="checkbox" id="task-run" onclick="addXP(150, this)" class="w-5 h-5 rounded text-emerald-500">
+                <span class="flex-1 text-sm">Пробежка</span>
+                <span class="text-emerald-400 font-bold text-xs">+150</span>
+            </label>
+        </div>
+
+        <div id="menu-family" class="hidden mt-4 space-y-2">
+            <label class="flex items-center gap-3 p-4 bg-gray-800 rounded-xl border border-gray-700">
+                <input type="checkbox" id="task-kids" onclick="addXP(100, this)" class="w-5 h-5 rounded text-blue-500">
+                <span class="flex-1 text-sm">Время с Витюшей и Димулей</span>
+                <span class="text-emerald-400 font-bold text-xs">+100</span>
+            </label>
+        </div>
+    </div>
+
+    <div id="tab-shop" class="hidden">
+        <h2 class="text-xl font-black mb-6 uppercase tracking-tight">Магазин наград 🛒</h2>
+        <div class="grid grid-cols-1 gap-4">
+            <div onclick="buyReward(100, 'Шоколадка')" class="bg-gray-800 p-4 rounded-2xl border border-gray-700 flex justify-between items-center active:scale-95 transition-transform shadow-lg">
+                <div class="flex items-center gap-4">
+                    <div class="text-3xl">🍫</div>
+                    <div>
+                        <div class="font-bold">Шоколадный батончик</div>
+                        <div class="text-xs text-gray-500">Маленькая радость</div>
+                    </div>
                 </div>
-                <div class="w-full bg-gray-700 rounded-full h-2">
-                    <div id="water-progress" class="bg-cyan-400 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                <div class="text-amber-400 font-black">100 XP</div>
+            </div>
+
+            <div onclick="buyReward(150, 'Газировка')" class="bg-gray-800 p-4 rounded-2xl border border-gray-700 flex justify-between items-center active:scale-95 transition-transform shadow-lg">
+                <div class="flex items-center gap-4">
+                    <div class="text-3xl">🥤</div>
+                    <div>
+                        <div class="font-bold">Газировка</div>
+                        <div class="text-xs text-gray-500">Освежающий дофамин</div>
+                    </div>
                 </div>
+                <div class="text-amber-400 font-black">150 XP</div>
+            </div>
+
+            <div onclick="buyReward(200, 'Выпечка')" class="bg-gray-800 p-4 rounded-2xl border border-gray-700 flex justify-between items-center active:scale-95 transition-transform shadow-lg">
+                <div class="flex items-center gap-4">
+                    <div class="text-3xl">🥐</div>
+                    <div>
+                        <div class="font-bold">Свежая выпечка</div>
+                        <div class="text-xs text-gray-500">Утренний бонус</div>
+                    </div>
+                </div>
+                <div class="text-amber-400 font-black">200 XP</div>
+            </div>
+
+            <div onclick="buyReward(300, 'Снеки')" class="bg-gray-800 p-4 rounded-2xl border border-gray-700 flex justify-between items-center active:scale-95 transition-transform shadow-lg">
+                <div class="flex items-center gap-4">
+                    <div class="text-3xl">🍿</div>
+                    <div>
+                        <div class="font-bold">Снеки / Чипсы</div>
+                        <div class="text-xs text-gray-500">Для вечернего кино</div>
+                    </div>
+                </div>
+                <div class="text-amber-400 font-black">300 XP</div>
+            </div>
+
+            <div onclick="buyReward(600, 'Фаст Фуд')" class="bg-gray-800 p-4 rounded-2xl border border-gray-700 flex justify-between items-center active:scale-95 transition-transform shadow-lg">
+                <div class="flex items-center gap-4">
+                    <div class="text-3xl">🍔</div>
+                    <div>
+                        <div class="font-bold text-red-400 uppercase">Фаст Фуд</div>
+                        <div class="text-xs text-gray-500">Легендарный обед</div>
+                    </div>
+                </div>
+                <div class="text-amber-400 font-black">600 XP</div>
             </div>
         </div>
     </div>
 
-    <div class="flex overflow-x-auto no-scrollbar gap-4 pb-2">
-        <button onclick="toggleMenu('menu-sport')" class="min-w-[140px] bg-gray-800 p-4 rounded-2xl border border-gray-700 active:scale-95 transition-transform text-left shadow-md">
-            <div class="text-emerald-400 mb-2 text-2xl">🏃‍♂️</div>
-            <h3 class="font-bold">Активность</h3>
+    <div class="fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-md border-t border-gray-800 p-3 flex justify-around shadow-2xl z-50">
+        <button onclick="showTab('tasks')" id="nav-tasks" class="flex flex-col items-center gap-1 tab-active transition-all">
+            <span class="text-xl">📈</span>
+            <span class="text-[10px] font-bold uppercase">Привычки</span>
         </button>
-        <button onclick="toggleMenu('menu-family')" class="min-w-[140px] bg-gray-800 p-4 rounded-2xl border border-gray-700 active:scale-95 transition-transform text-left shadow-md">
-            <div class="text-blue-400 mb-2 text-2xl">👨‍👩‍👦</div>
-            <h3 class="font-bold">Семья</h3>
+        <button onclick="showTab('shop')" id="nav-shop" class="flex flex-col items-center gap-1 text-gray-500 transition-all">
+            <span class="text-xl">🛒</span>
+            <span class="text-[10px] font-bold uppercase">Магазин</span>
         </button>
-    </div>
-
-    <div id="menu-sport" class="submenu-enter bg-gray-800 rounded-2xl p-4 shadow-md">
-        <h4 class="font-bold text-emerald-400 mb-3">Задачи: Активность</h4>
-        <div class="space-y-3">
-            <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl cursor-pointer">
-                <input type="checkbox" id="task-run" onclick="addXP(150, this)" class="w-6 h-6 rounded text-emerald-500">
-                <span class="flex-1">Пробежка</span>
-                <span class="text-emerald-400 font-bold">+150</span>
-            </label>
-        </div>
-    </div>
-
-    <div id="menu-family" class="submenu-enter bg-gray-800 rounded-2xl p-4 shadow-md">
-        <h4 class="font-bold text-blue-400 mb-3">Задачи: Семья</h4>
-        <div class="space-y-3">
-            <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl cursor-pointer">
-                <input type="checkbox" id="task-kids" onclick="addXP(100, this)" class="w-6 h-6 rounded text-blue-500">
-                <span class="flex-1">Время с детьми</span>
-                <span class="text-emerald-400 font-bold">+100</span>
-            </label>
-        </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        
         const backendUrl = "https://rpg-backend-yg16.onrender.com";
         let username = "Гость";
 
-        try {
-            const user = tg.initDataUnsafe?.user;
-            if (user && user.first_name) {
-                username = user.first_name;
-                document.getElementById('user-name').textContent = username;
-                const avatarContainer = document.getElementById('avatar-container');
-                if (user.photo_url) {
-                    avatarContainer.innerHTML = `<img src="${user.photo_url}" alt="Avatar" class="w-full h-full object-cover">`;
-                } else {
-                    document.getElementById('avatar-initial').textContent = username.charAt(0).toUpperCase();
-                }
-            }
-        } catch (e) {
-            console.error("Ошибка Telegram API", e);
+        const user = tg.initDataUnsafe?.user;
+        if (user && user.first_name) {
+            username = user.first_name;
+            document.getElementById('user-name').textContent = username;
+            if (user.photo_url) document.getElementById('avatar-container').innerHTML = `<img src="${user.photo_url}" class="w-full h-full object-cover">`;
         }
 
-        const todayDate = new Date().toDateString();
-        let savedData = JSON.parse(localStorage.getItem('rpgTasks_v6')) || { date: '', tasks: [] };
-
-        if (savedData.date !== todayDate) {
-            savedData = { date: todayDate, tasks: [] };
-            localStorage.setItem('rpgTasks_v6', JSON.stringify(savedData));
+        function showTab(name) {
+            document.getElementById('tab-tasks').classList.toggle('hidden', name !== 'tasks');
+            document.getElementById('tab-shop').classList.toggle('hidden', name !== 'shop');
+            document.getElementById('nav-tasks').classList.toggle('tab-active', name === 'tasks');
+            document.getElementById('nav-tasks').classList.toggle('text-gray-500', name !== 'tasks');
+            document.getElementById('nav-shop').classList.toggle('tab-active', name === 'shop');
+            document.getElementById('nav-shop').classList.toggle('text-gray-500', name !== 'shop');
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
         }
 
-        function loadSavedData() {
-            savedData.tasks.forEach(taskId => {
-                const checkbox = document.getElementById(taskId);
-                if (checkbox) {
-                    checkbox.checked = true;
-                    checkbox.disabled = true;
-                    checkbox.parentElement.style.opacity = '0.5';
-                }
+        function toggleMenu(id) {
+            const el = document.getElementById(id);
+            el.classList.toggle('hidden');
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        }
+
+        function updateUI(data) {
+            document.getElementById('total-xp').textContent = data.total_xp;
+            document.getElementById('month-xp').textContent = data.current_month_xp;
+            document.getElementById('user-hp').textContent = data.hp;
+            document.getElementById('hp-bar').style.width = data.hp + '%';
+            
+            // Вода
+            document.getElementById('water-text').textContent = `${data.water_count} / 8 стаканов`;
+            document.getElementById('water-progress').style.width = (data.water_count / 8 * 100) + '%';
+            const wBtn = document.getElementById('btn-water');
+            wBtn.disabled = data.water_count >= 8;
+            wBtn.innerHTML = data.water_count >= 8 ? '✅' : '🥤';
+
+            // Галочки
+            document.querySelectorAll('input[type="checkbox"]').forEach(c => {
+                const done = data.completed_tasks.split(',').includes(c.id);
+                c.checked = done; c.disabled = done;
+                c.parentElement.style.opacity = done ? '0.4' : '1';
             });
-        }
-
-        function updateWaterUI(count) {
-            document.getElementById('water-text').textContent = `${count} / 8 стаканов`;
-            let percent = (count / 8) * 100;
-            document.getElementById('water-progress').style.width = percent + '%';
-            
-            const btn = document.getElementById('btn-water');
-            if (count >= 8) {
-                btn.disabled = true;
-                btn.style.opacity = '0.5';
-                btn.innerHTML = '✅';
-            } else {
-                btn.disabled = false;
-                btn.style.opacity = '1';
-                btn.innerHTML = '🥤';
-            }
-        }
-
-        function updateUI(total_xp, current_month_xp, last_month_xp, hp, water_count) {
-            document.getElementById('total-xp').textContent = total_xp;
-            document.getElementById('month-xp').textContent = current_month_xp; 
-            document.getElementById('last-month-xp').textContent = last_month_xp;
-            
-            document.getElementById('user-hp').textContent = hp;
-            const hpBar = document.getElementById('hp-bar');
-            hpBar.style.width = hp + '%';
-            
-            const warning = document.getElementById('debuff-warning');
-            if (hp < 30) {
-                hpBar.className = "bg-gradient-to-r from-red-700 to-red-500 h-2.5 rounded-full animate-pulse transition-all duration-500";
-                warning.classList.remove('hidden');
-            } else {
-                hpBar.className = "bg-gradient-to-r from-red-500 to-rose-400 h-2.5 rounded-full transition-all duration-500";
-                warning.classList.add('hidden');
-            }
-            
-            updateWaterUI(water_count);
         }
 
         async function loadHero() {
             try {
-                let response = await fetch(`${backendUrl}/get_hero/${username}`);
-                let data = await response.json();
-                updateUI(data.total_xp, data.current_month_xp, data.last_month_xp, data.hp, data.water_count);
-            } catch (error) {
-                console.error("Ошибка сервера", error);
-            }
+                const r = await fetch(`${backendUrl}/get_hero/${username}`);
+                updateUI(await r.json());
+            } catch (e) { console.error(e); }
         }
 
         async function drinkWater() {
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-            
-            try {
-                let response = await fetch(`${backendUrl}/drink_water/${username}`, { method: 'POST' });
-                let data = await response.json();
-                updateUI(data.total_xp, data.current_month_xp, data.last_month_xp, data.hp, data.water_count);
-            } catch (error) {
-                console.error("Ошибка сервера", error);
-            }
+            const r = await fetch(`${backendUrl}/drink_water/${username}`, {method:'POST'});
+            updateUI(await r.json());
         }
 
-        async function addXP(amount, element) {
-            const taskId = element.id;
-            element.checked = true;
-            element.disabled = true;
-            element.parentElement.style.opacity = '0.5';
-            
+        async function addXP(amt, el) {
+            el.disabled = true;
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-
-            if (!savedData.tasks.includes(taskId)) {
-                savedData.tasks.push(taskId);
-                localStorage.setItem('rpgTasks_v6', JSON.stringify(savedData));
-            }
-
-            try {
-                let response = await fetch(`${backendUrl}/add_xp/${username}?amount=${amount}`, { method: 'POST' });
-                let data = await response.json();
-                updateUI(data.total_xp, data.current_month_xp, data.last_month_xp, data.hp, data.water_count);
-            } catch (error) {
-                console.error("Ошибка сервера", error);
-            }
+            const r = await fetch(`${backendUrl}/add_xp/${username}?amount=${amt}&task_id=${el.id}`, {method:'POST'});
+            updateUI(await r.json());
         }
 
-        function toggleMenu(menuId) {
-            const allMenus = document.querySelectorAll('.submenu-enter');
-            allMenus.forEach(menu => {
-                if(menu.id !== menuId) menu.classList.remove('submenu-enter-active');
-            });
-            document.getElementById(menuId).classList.toggle('submenu-enter-active');
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        async function buyReward(cost, name) {
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
+            const r = await fetch(`${backendUrl}/buy_reward/${username}?cost=${cost}`, {method:'POST'});
+            const data = await r.json();
+            if (data.error) {
+                tg.showAlert(data.error);
+            } else {
+                tg.showConfirm(`Потратить ${cost} XP на: ${name}?`, (ok) => {
+                    if (ok) updateUI(data);
+                });
+            }
         }
 
         loadHero();
-        loadSavedData();
     </script>
 </body>
 </html>
