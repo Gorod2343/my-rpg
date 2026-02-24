@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Life RPG</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        /* Скрываем скроллбар для красоты, но оставляем прокрутку */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        /* Плавная анимация для подменю */
+        .submenu-enter { max-height: 0; opacity: 0; overflow: hidden; transition: all 0.4s ease-out; }
+        .submenu-enter-active { max-height: 500px; opacity: 1; margin-top: 1rem; }
+    </style>
+</head>
+<body class="bg-gray-900 text-white font-sans antialiased p-4">
+
+    <div class="flex justify-between items-center mb-6">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center text-xl font-bold">
+                Г
+            </div>
+            <div>
+                <h1 class="text-xl font-bold">Герой</h1>
+                <p class="text-amber-400 text-sm">Уровень 12</p>
+            </div>
+        </div>
+        <div class="text-right">
+            <p class="text-xs text-gray-400">Опыт</p>
+            <p class="font-bold">450 <span class="text-amber-400">XP</span></p>
+        </div>
+    </div>
+
+    <div class="w-full bg-gray-800 rounded-full h-3 mb-8">
+        <div class="bg-gradient-to-r from-amber-400 to-orange-500 h-3 rounded-full" style="width: 45%"></div>
+    </div>
+
+    <h2 class="text-lg font-bold mb-4">Сферы жизни</h2>
+
+    <div class="flex overflow-x-auto no-scrollbar gap-4 pb-2">
+        
+        <button onclick="toggleMenu('menu-sport')" class="min-w-[140px] bg-gray-800 p-4 rounded-2xl border border-gray-700 active:scale-95 transition-transform text-left">
+            <div class="text-orange-500 mb-2">💪</div>
+            <h3 class="font-bold">Тренировка</h3>
+            <div class="w-full bg-gray-700 h-1 mt-3 rounded-full"><div class="bg-orange-500 h-1 rounded-full" style="width: 65%"></div></div>
+        </button>
+
+        <button onclick="toggleMenu('menu-family')" class="min-w-[140px] bg-gray-800 p-4 rounded-2xl border border-gray-700 active:scale-95 transition-transform text-left">
+            <div class="text-blue-400 mb-2">👨‍👩‍👦</div>
+            <h3 class="font-bold">Семья</h3>
+            <div class="w-full bg-gray-700 h-1 mt-3 rounded-full"><div class="bg-blue-400 h-1 rounded-full" style="width: 40%"></div></div>
+        </button>
+
+        <button onclick="toggleMenu('menu-rest')" class="min-w-[140px] bg-gray-800 p-4 rounded-2xl border border-gray-700 active:scale-95 transition-transform text-left">
+            <div class="text-purple-400 mb-2">🎮</div>
+            <h3 class="font-bold">Отдых</h3>
+            <div class="w-full bg-gray-700 h-1 mt-3 rounded-full"><div class="bg-purple-400 h-1 rounded-full" style="width: 80%"></div></div>
+        </button>
+        
+        <button onclick="toggleMenu('menu-home')" class="min-w-[140px] bg-gray-800 p-4 rounded-2xl border border-gray-700 active:scale-95 transition-transform text-left">
+            <div class="text-green-400 mb-2">🏠</div>
+            <h3 class="font-bold">Быт</h3>
+            <div class="w-full bg-gray-700 h-1 mt-3 rounded-full"><div class="bg-green-400 h-1 rounded-full" style="width: 20%"></div></div>
+        </button>
+    </div>
+
+    <div id="menu-sport" class="submenu-enter bg-gray-800 rounded-2xl p-4">
+        <h4 class="font-bold text-orange-500 mb-3">Задачи: Тренировка</h4>
+        <div class="space-y-3">
+            <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl">
+                <input type="checkbox" class="w-5 h-5 rounded text-orange-500">
+                <span class="flex-1">Сделать отжимания</span>
+                <span class="text-amber-400 text-sm">+50 XP</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl">
+                <input type="checkbox" class="w-5 h-5 rounded text-orange-500">
+                <span class="flex-1">Упражнения на плечи с эспандером</span>
+                <span class="text-amber-400 text-sm">+80 XP</span>
+            </label>
+        </div>
+    </div>
+
+    <div id="menu-family" class="submenu-enter bg-gray-800 rounded-2xl p-4">
+        <h4 class="font-bold text-blue-400 mb-3">Задачи: Семья</h4>
+        <div class="space-y-3">
+            <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl">
+                <input type="checkbox" class="w-5 h-5 rounded text-blue-400">
+                <span class="flex-1">Время с Витюшей и Димулей</span>
+                <span class="text-amber-400 text-sm">+100 XP</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl">
+                <input type="checkbox" class="w-5 h-5 rounded text-blue-400">
+                <span class="flex-1">Футбол и ниндзя-тренировка Вити</span>
+                <span class="text-amber-400 text-sm">+70 XP</span>
+            </label>
+        </div>
+    </div>
+
+    <div id="menu-rest" class="submenu-enter bg-gray-800 rounded-2xl p-4">
+        <h4 class="font-bold text-purple-400 mb-3">Задачи: Отдых</h4>
+        <div class="space-y-3">
+            <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl">
+                <input type="checkbox" class="w-5 h-5 rounded text-purple-400">
+                <span class="flex-1">Поиграть в приставку</span>
+                <span class="text-amber-400 text-sm">+30 XP</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl">
+                <input type="checkbox" class="w-5 h-5 rounded text-purple-400">
+                <span class="flex-1">Посмотреть хоррор</span>
+                <span class="text-amber-400 text-sm">+40 XP</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl">
+                <input type="checkbox" class="w-5 h-5 rounded text-purple-400">
+                <span class="flex-1">Сыграть партию в «Мафию»</span>
+                <span class="text-amber-400 text-sm">+60 XP</span>
+            </label>
+        </div>
+    </div>
+
+    <div id="menu-home" class="submenu-enter bg-gray-800 rounded-2xl p-4">
+        <h4 class="font-bold text-green-400 mb-3">Задачи: Быт</h4>
+        <div class="space-y-3">
+            <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl">
+                <input type="checkbox" class="w-5 h-5 rounded text-green-400">
+                <span class="flex-1">Спрятать обои от Морти</span>
+                <span class="text-amber-400 text-sm">+20 XP</span>
+            </label>
+        </div>
+    </div>
+
+    <script>
+        // Инициализация Telegram Web App
+        window.Telegram.WebApp.expand(); // Разворачиваем на весь экран
+        
+        // Логика плавного открытия подменю
+        function toggleMenu(menuId) {
+            // Закрываем все остальные меню
+            const allMenus = document.querySelectorAll('.submenu-enter');
+            allMenus.forEach(menu => {
+                if(menu.id !== menuId) {
+                    menu.classList.remove('submenu-enter-active');
+                }
+            });
+            
+            // Открываем или закрываем выбранное
+            const targetMenu = document.getElementById(menuId);
+            targetMenu.classList.toggle('submenu-enter-active');
+            
+            // Легкая вибрация телефона при нажатии
+            if (window.Telegram.WebApp.HapticFeedback) {
+                window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+            }
+        }
+    </script>
+</body>
+</html>
