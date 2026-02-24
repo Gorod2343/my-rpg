@@ -69,3 +69,181 @@
                     <span>Прогресс</span>
                     <span id="water-text">0 / 8 стаканов</span>
                 </div>
+                <div class="w-full bg-gray-700 rounded-full h-2">
+                    <div id="water-progress" class="bg-cyan-400 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex overflow-x-auto no-scrollbar gap-4 pb-2">
+        <button onclick="toggleMenu('menu-sport')" class="min-w-[140px] bg-gray-800 p-4 rounded-2xl border border-gray-700 active:scale-95 transition-transform text-left shadow-md">
+            <div class="text-emerald-400 mb-2 text-2xl">🏃‍♂️</div>
+            <h3 class="font-bold">Активность</h3>
+        </button>
+        <button onclick="toggleMenu('menu-family')" class="min-w-[140px] bg-gray-800 p-4 rounded-2xl border border-gray-700 active:scale-95 transition-transform text-left shadow-md">
+            <div class="text-blue-400 mb-2 text-2xl">👨‍👩‍👦</div>
+            <h3 class="font-bold">Семья</h3>
+        </button>
+    </div>
+
+    <div id="menu-sport" class="submenu-enter bg-gray-800 rounded-2xl p-4 shadow-md">
+        <h4 class="font-bold text-emerald-400 mb-3">Задачи: Активность</h4>
+        <div class="space-y-3">
+            <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl cursor-pointer">
+                <input type="checkbox" id="task-run" onclick="addXP(150, this)" class="w-6 h-6 rounded text-emerald-500">
+                <span class="flex-1">Пробежка</span>
+                <span class="text-emerald-400 font-bold">+150</span>
+            </label>
+        </div>
+    </div>
+
+    <div id="menu-family" class="submenu-enter bg-gray-800 rounded-2xl p-4 shadow-md">
+        <h4 class="font-bold text-blue-400 mb-3">Задачи: Семья</h4>
+        <div class="space-y-3">
+            <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl cursor-pointer">
+                <input type="checkbox" id="task-kids" onclick="addXP(100, this)" class="w-6 h-6 rounded text-blue-500">
+                <span class="flex-1">Время с детьми</span>
+                <span class="text-emerald-400 font-bold">+100</span>
+            </label>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        
+        const backendUrl = "https://rpg-backend-yg16.onrender.com";
+        let username = "Гость";
+
+        try {
+            const user = tg.initDataUnsafe?.user;
+            if (user && user.first_name) {
+                username = user.first_name;
+                document.getElementById('user-name').textContent = username;
+                const avatarContainer = document.getElementById('avatar-container');
+                if (user.photo_url) {
+                    avatarContainer.innerHTML = `<img src="${user.photo_url}" alt="Avatar" class="w-full h-full object-cover">`;
+                } else {
+                    document.getElementById('avatar-initial').textContent = username.charAt(0).toUpperCase();
+                }
+            }
+        } catch (e) {
+            console.error("Ошибка Telegram API", e);
+        }
+
+        const todayDate = new Date().toDateString();
+        let savedData = JSON.parse(localStorage.getItem('rpgTasks_v6')) || { date: '', tasks: [] };
+
+        if (savedData.date !== todayDate) {
+            savedData = { date: todayDate, tasks: [] };
+            localStorage.setItem('rpgTasks_v6', JSON.stringify(savedData));
+        }
+
+        function loadSavedData() {
+            savedData.tasks.forEach(taskId => {
+                const checkbox = document.getElementById(taskId);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    checkbox.disabled = true;
+                    checkbox.parentElement.style.opacity = '0.5';
+                }
+            });
+        }
+
+        function updateWaterUI(count) {
+            document.getElementById('water-text').textContent = `${count} / 8 стаканов`;
+            let percent = (count / 8) * 100;
+            document.getElementById('water-progress').style.width = percent + '%';
+            
+            const btn = document.getElementById('btn-water');
+            if (count >= 8) {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.innerHTML = '✅';
+            } else {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.innerHTML = '🥤';
+            }
+        }
+
+        function updateUI(total_xp, current_month_xp, last_month_xp, hp, water_count) {
+            document.getElementById('total-xp').textContent = total_xp;
+            document.getElementById('month-xp').textContent = current_month_xp; 
+            document.getElementById('last-month-xp').textContent = last_month_xp;
+            
+            document.getElementById('user-hp').textContent = hp;
+            const hpBar = document.getElementById('hp-bar');
+            hpBar.style.width = hp + '%';
+            
+            const warning = document.getElementById('debuff-warning');
+            if (hp < 30) {
+                hpBar.className = "bg-gradient-to-r from-red-700 to-red-500 h-2.5 rounded-full animate-pulse transition-all duration-500";
+                warning.classList.remove('hidden');
+            } else {
+                hpBar.className = "bg-gradient-to-r from-red-500 to-rose-400 h-2.5 rounded-full transition-all duration-500";
+                warning.classList.add('hidden');
+            }
+            
+            updateWaterUI(water_count);
+        }
+
+        async function loadHero() {
+            try {
+                let response = await fetch(`${backendUrl}/get_hero/${username}`);
+                let data = await response.json();
+                updateUI(data.total_xp, data.current_month_xp, data.last_month_xp, data.hp, data.water_count);
+            } catch (error) {
+                console.error("Ошибка сервера", error);
+            }
+        }
+
+        async function drinkWater() {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            
+            try {
+                let response = await fetch(`${backendUrl}/drink_water/${username}`, { method: 'POST' });
+                let data = await response.json();
+                updateUI(data.total_xp, data.current_month_xp, data.last_month_xp, data.hp, data.water_count);
+            } catch (error) {
+                console.error("Ошибка сервера", error);
+            }
+        }
+
+        async function addXP(amount, element) {
+            const taskId = element.id;
+            element.checked = true;
+            element.disabled = true;
+            element.parentElement.style.opacity = '0.5';
+            
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+
+            if (!savedData.tasks.includes(taskId)) {
+                savedData.tasks.push(taskId);
+                localStorage.setItem('rpgTasks_v6', JSON.stringify(savedData));
+            }
+
+            try {
+                let response = await fetch(`${backendUrl}/add_xp/${username}?amount=${amount}`, { method: 'POST' });
+                let data = await response.json();
+                updateUI(data.total_xp, data.current_month_xp, data.last_month_xp, data.hp, data.water_count);
+            } catch (error) {
+                console.error("Ошибка сервера", error);
+            }
+        }
+
+        function toggleMenu(menuId) {
+            const allMenus = document.querySelectorAll('.submenu-enter');
+            allMenus.forEach(menu => {
+                if(menu.id !== menuId) menu.classList.remove('submenu-enter-active');
+            });
+            document.getElementById(menuId).classList.toggle('submenu-enter-active');
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        }
+
+        loadHero();
+        loadSavedData();
+    </script>
+</body>
+</html>
