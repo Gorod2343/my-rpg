@@ -11,213 +11,111 @@
         body { font-family: 'Inter', sans-serif; background-color: #0c1017; color: #f0f6fc; }
         .prosto-card { background-color: #161b22; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1.5rem; }
         .prosto-btn { background-color: #2563eb; color: white; border-radius: 1rem; transition: all 0.2s ease; }
-        .prosto-btn:active { transform: scale(0.97); background-color: #1d4ed8; }
         .nav-active { color: #3b82f6; }
-        .btn-loading { opacity: 0.6; pointer-events: none; transform: scale(0.98); }
-        .done-task { opacity: 0.4; pointer-events: none; }
-        #splash-screen { transition: opacity 0.5s ease-out; }
-        .pulse-icon { animation: pulse-scale 1.5s infinite ease-in-out; }
-        @keyframes pulse-scale { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.15); opacity: 0.7; } }
-        .accordion-content { overflow: hidden; transition: max-height 0.4s ease-in-out; max-height: 0; }
-        .chevron { transition: transform 0.3s ease; }
-        .rotate-180 { transform: rotate(180deg); }
-        #editor-modal { transition: opacity 0.3s, transform 0.3s; opacity: 0; pointer-events: none; transform: translateY(20px); }
-        #editor-modal.active { opacity: 1; pointer-events: auto; transform: translateY(0); }
+        .btn-loading { opacity: 0.6; pointer-events: none; }
     </style>
 </head>
-<body class="p-4 pb-28 antialiased">
+<body class="p-4 pb-28">
 
     <div id="splash-screen" class="fixed inset-0 bg-[#0c1017] z-[9999] flex flex-col items-center justify-center">
-        <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center pulse-icon mb-6">
-            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+        <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center animate-bounce mb-6">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
         </div>
-        <p class="text-blue-500 font-semibold text-sm animate-pulse tracking-widest uppercase">Загрузка профиля...</p>
+        <p id="loading-status" class="text-blue-500 font-semibold text-sm animate-pulse uppercase tracking-widest">Связь с сервером...</p>
     </div>
 
     <div class="flex justify-between items-center mb-8 pt-2">
         <div class="flex items-center gap-3">
-            <div id="avatar-container" onclick="manualSync()" class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xl cursor-pointer"></div>
+            <div id="avatar" class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xl"></div>
             <div>
-                <h1 id="user-name" class="text-lg font-bold leading-tight">Загрузка...</h1>
-                <div class="flex items-center gap-2 mt-0.5">
-                    <p class="text-xs text-gray-400">XP: <span id="total-xp" class="text-white font-semibold">0</span></p>
-                    <div id="streak-badge" class="hidden items-center bg-orange-500/10 px-1.5 py-0.5 rounded-full border border-orange-500/20">
+                <h1 id="user-name" class="text-lg font-bold">...</h1>
+                <div class="flex items-center gap-2">
+                    <p class="text-xs text-gray-400 font-semibold">XP: <span id="total-xp" class="text-white">0</span></p>
+                    <div id="streak-badge" class="hidden items-center bg-orange-500/10 px-2 py-0.5 rounded-full border border-orange-500/20">
                         <span class="text-[10px]">🔥</span>
-                        <span id="streak-count" class="text-[10px] text-orange-500 font-extrabold ml-0.5">0</span>
+                        <span id="streak-count" class="text-[10px] text-orange-500 font-black ml-1">0</span>
                     </div>
                 </div>
             </div>
         </div>
         <div class="text-right">
-            <div class="text-[10px] text-gray-400 font-bold uppercase mb-1 tracking-wider">Здоровье <span id="user-hp" class="text-white">100</span>%</div>
-            <div class="w-24 bg-[#0c1017] h-1.5 rounded-full border border-gray-800 overflow-hidden ml-auto">
-                <div id="hp-bar" class="bg-blue-500 h-full transition-all duration-700" style="width: 100%"></div>
-            </div>
+            <div class="text-[10px] text-gray-400 font-bold uppercase mb-1">Здоровье <span id="hp-val">100</span>%</div>
+            <div class="w-24 bg-gray-800 h-1.5 rounded-full overflow-hidden"><div id="hp-bar" class="bg-blue-500 h-full w-full"></div></div>
         </div>
     </div>
 
-    <div id="tab-tasks" class="space-y-6">
-        <div class="prosto-card p-6 relative overflow-hidden text-center">
-            <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-600/20 rounded-full blur-3xl"></div>
-            <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-2">Очков в этом месяце</p>
-            <h2 id="month-xp" class="text-5xl font-extrabold text-white">0</h2>
+    <div class="space-y-6">
+        <div class="prosto-card p-6 text-center">
+            <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">Очков в месяце</p>
+            <h2 id="month-xp" class="text-5xl font-black text-white">0</h2>
         </div>
 
         <div class="prosto-card p-5">
             <div class="flex justify-between items-center mb-4">
-                <div>
-                    <span class="inline-block px-2.5 py-1 bg-blue-500/20 text-blue-400 text-[10px] rounded-full font-bold uppercase tracking-wider mb-2">Гидратация</span>
-                    <div class="font-bold text-base">Водный баланс</div>
-                </div>
-                <div class="text-blue-400 font-bold text-sm">+5 XP</div>
+                <div class="font-bold text-sm uppercase text-blue-400 tracking-wider">Водный баланс</div>
+                <div class="text-xs font-bold" id="water-count">0 / 8 ст.</div>
             </div>
-            <div class="flex items-center gap-4">
-                <button onclick="drinkWater(this)" class="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-xl active:scale-95 transition-transform shrink-0">💧</button>
-                <div class="flex-1">
-                    <div class="flex justify-between text-xs text-gray-400 font-semibold mb-2"><span>Прогресс</span><span id="water-text">0 / 8 ст.</span></div>
-                    <div class="w-full bg-[#0c1017] h-2 rounded-full overflow-hidden border border-gray-800"><div id="water-progress" class="bg-blue-500 h-full transition-all duration-300" style="width: 0%"></div></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="prosto-card overflow-hidden">
-            <button onclick="toggleAccordion('acc-sport', 'icon-sport')" class="w-full p-5 flex justify-between items-center bg-[#161b22] hover:bg-white/5 transition-colors">
-                <div class="flex items-center gap-3"><div class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold shrink-0">2</div><div class="text-left pl-1"><div class="font-bold text-white text-base">Активность</div></div></div>
-                <svg id="icon-sport" class="w-6 h-6 text-gray-500 chevron shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-            </button>
-            <div id="acc-sport" class="accordion-content bg-[#0c1017]/30 border-t border-gray-800/50"><div id="list-sport" class="p-2 space-y-1"></div></div>
-        </div>
-
-        <div class="prosto-card overflow-hidden">
-            <button onclick="toggleAccordion('acc-family', 'icon-family')" class="w-full p-5 flex justify-between items-center bg-[#161b22] hover:bg-white/5 transition-colors">
-                <div class="flex items-center gap-3"><div class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold shrink-0">3</div><div class="text-left pl-1"><div class="font-bold text-white text-base">Отношения</div></div></div>
-                <svg id="icon-family" class="w-6 h-6 text-gray-500 chevron shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-            </button>
-            <div id="acc-family" class="accordion-content bg-[#0c1017]/30 border-t border-gray-800/50"><div id="list-family" class="p-2 space-y-1"></div></div>
-        </div>
-
-        <div class="text-center mt-6">
-            <button onclick="openEditor()" class="text-[10px] text-gray-500 hover:text-blue-400 font-bold uppercase tracking-widest transition-colors underline decoration-dotted">⚙️ Настроить свои привычки</button>
+            <button onclick="drinkWater(this)" class="w-full prosto-btn p-4 font-bold text-sm shadow-lg shadow-blue-900/20 active:scale-95 transition-all">ВЫПИТЬ СТАКАН 💧</button>
         </div>
     </div>
 
-    <div id="editor-modal" class="fixed inset-0 bg-[#0c1017] z-[10000] p-4 overflow-y-auto pb-28">
-        <div class="flex justify-between items-center mb-6 pt-2"><h2 class="text-xl font-bold">Редактор</h2><button onclick="closeEditor()" class="text-gray-400">Закрыть</button></div>
-        <div class="prosto-card p-5 mb-6">
-            <h3 class="text-xs font-bold text-blue-400 mb-4 uppercase tracking-wider">Новая привычка</h3>
-            <div class="space-y-3">
-                <input type="text" id="new-h-name" placeholder="Название" class="w-full bg-[#0c1017] border border-gray-800 rounded-xl p-3 text-sm text-white focus:border-blue-500 outline-none">
-                <input type="text" id="new-h-tag" placeholder="Тег" class="w-full bg-[#0c1017] border border-gray-800 rounded-xl p-3 text-sm text-white focus:border-blue-500 outline-none">
-                <div class="grid grid-cols-2 gap-3">
-                    <select id="new-h-cat" class="w-full bg-[#0c1017] border border-gray-800 rounded-xl p-3 text-sm text-white outline-none"><option value="sport">Спорт</option><option value="family">Отношения</option></select>
-                    <input type="number" id="new-h-xp" placeholder="XP" class="w-full bg-[#0c1017] border border-gray-800 rounded-xl p-3 text-sm text-white focus:border-blue-500 outline-none">
-                </div>
-                <button onclick="addNewHabit()" class="w-full prosto-btn p-3 font-bold text-sm">Добавить</button>
-            </div>
-        </div>
-        <div id="editor-list" class="space-y-2"></div>
-        <button onclick="saveHabitsToServer(this)" class="w-full bg-blue-600 text-white rounded-xl p-4 font-bold text-sm mt-8">Сохранить всё</button>
-    </div>
-
-    <div id="tab-shop" class="hidden space-y-6"><div id="shop-items" class="p-4 space-y-3"></div></div>
-    <div id="tab-history" class="hidden space-y-6"><div id="history-list" class="p-4 space-y-3"></div></div>
-    <div id="tab-calc" class="hidden space-y-6"><div class="p-4"><button onclick="applyWaterGoal(this)" class="w-full prosto-btn p-3.5 font-bold text-sm">Установить цель 8 ст.</button></div></div>
-
-    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md bg-[#161b22]/90 backdrop-blur-xl border border-gray-800 rounded-2xl p-1.5 flex justify-around z-50">
-        <button onclick="showTab('tasks')" id="nav-tasks" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl nav-active bg-white/5 transition-all"><span class="text-[9px] font-bold uppercase tracking-wider">Путь</span></button>
-        <button onclick="showTab('shop')" id="nav-shop" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl text-gray-500 transition-all"><span class="text-[9px] font-bold uppercase tracking-wider">Магазин</span></button>
-        <button onclick="showTab('history')" id="nav-history" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl text-gray-500 transition-all"><span class="text-[9px] font-bold uppercase tracking-wider">Журнал</span></button>
+    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] bg-[#161b22]/90 backdrop-blur-md border border-gray-800 rounded-2xl p-4 flex justify-around shadow-2xl">
+        <div class="text-blue-500 font-bold text-[10px] uppercase">Путь</div>
+        <div class="text-gray-500 font-bold text-[10px] uppercase opacity-50">Магазин</div>
+        <div class="text-gray-500 font-bold text-[10px] uppercase opacity-50">Журнал</div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
         const backendUrl = "https://rpg-backend-yg16.onrender.com";
-        
-        let userId = tg.initDataUnsafe?.user?.id.toString() || "guest_123";
-        let firstName = tg.initDataUnsafe?.user?.first_name || "Гость";
-        let tgInitData = tg.initData || ""; 
+        const userId = tg.initDataUnsafe?.user?.id.toString() || "guest";
+        const firstName = tg.initDataUnsafe?.user?.first_name || "Герой";
 
         document.getElementById('user-name').textContent = firstName;
-        document.getElementById('avatar-container').textContent = firstName[0];
+        document.getElementById('avatar').textContent = firstName[0];
 
-        const reqHeaders = { 'Content-Type': 'application/json', 'X-TG-Data': tgInitData };
-
-        const defaultHabits = [
-            { id: 'task-run', cat: 'sport', tag: 'Кардио', name: 'Пробежка', xp: 150 },
-            { id: 'task-strength', cat: 'sport', tag: 'Сила', name: 'Силовая', xp: 200 },
-            { id: 'task-family-time', cat: 'family', tag: 'Связь', name: 'Время с семьей', xp: 100 }
-        ];
-        let currentHabits = []; let completedTasksArray = [];
-
-        function renderHabits() {
-            const listSport = document.getElementById('list-sport'); const listFamily = document.getElementById('list-family'); const editorList = document.getElementById('editor-list');
-            listSport.innerHTML = ''; listFamily.innerHTML = ''; editorList.innerHTML = '';
-            currentHabits.forEach(h => {
-                const isDone = completedTasksArray.includes(h.id);
-                const html = `<button onclick="addXP('${h.id}', this)" class="w-full text-left flex items-center gap-4 p-4 rounded-xl ${isDone ? 'done-task' : ''}" ${isDone ? 'disabled' : ''}><div class="w-5 h-5 rounded-full border-2 ${isDone ? 'bg-blue-600 border-blue-600' : 'border-gray-600'}"></div><div class="flex-1"><span class="text-[8px] text-gray-500 uppercase font-bold">${h.tag}</span><div class="font-bold text-sm text-white">${h.name}</div></div><div class="text-blue-400 font-bold text-xs">+${h.xp} XP</div></button>`;
-                if (h.cat === 'sport') listSport.innerHTML += html; else listFamily.innerHTML += html;
-                editorList.innerHTML += `<div class="bg-[#161b22] p-3 rounded-xl flex justify-between items-center mb-2"><div class="text-sm font-bold text-white">${h.name}</div><button onclick="removeHabit('${h.id}')" class="text-red-500 font-bold text-xs">Удалить</button></div>`;
-            });
-        }
-
-        function openEditor() { document.getElementById('editor-modal').classList.add('active'); }
-        function closeEditor() { document.getElementById('editor-modal').classList.remove('active'); }
-        function addNewHabit() {
-            const name = document.getElementById('new-h-name').value; const tag = document.getElementById('new-h-tag').value; const cat = document.getElementById('new-h-cat').value; const xp = parseInt(document.getElementById('new-h-xp').value);
-            if(name && tag && xp) { currentHabits.push({ id: 'task-custom-' + Date.now(), cat: cat, tag: tag, name: name, xp: xp }); renderHabits(); }
-        }
-        function removeHabit(id) { currentHabits = currentHabits.filter(h => h.id !== id); renderHabits(); }
-
-        async function saveHabitsToServer(btn) {
-            btn.classList.add('btn-loading');
-            await fetch(`${backendUrl}/update_habits/${userId}`, { method: 'POST', headers: reqHeaders, body: JSON.stringify({habits: JSON.stringify(currentHabits)}) });
-            closeEditor(); loadHero(); btn.classList.remove('btn-loading');
+        async function loadHero() {
+            try {
+                const response = await fetch(`${backendUrl}/get_hero/${userId}`, {
+                    headers: { 'X-TG-Data': tg.initData || "" }
+                });
+                if (!response.ok) throw new Error('Ошибка сервера');
+                const data = await response.json();
+                updateUI(data);
+            } catch (e) {
+                document.getElementById('loading-status').textContent = "Ошибка сети. Перезагрузите.";
+                document.getElementById('loading-status').classList.remove('text-blue-500');
+                document.getElementById('loading-status').classList.add('text-red-500');
+            }
         }
 
         function updateUI(data) {
             document.getElementById('total-xp').textContent = data.total_xp;
             document.getElementById('month-xp').textContent = data.current_month_xp;
-            document.getElementById('user-hp').textContent = data.hp;
+            document.getElementById('water-count').textContent = `${data.water_count} / ${data.water_goal} ст.`;
+            document.getElementById('hp-val').textContent = data.hp;
             document.getElementById('hp-bar').style.width = data.hp + '%';
-            document.getElementById('water-text').textContent = `${data.water_count} / ${data.water_goal} ст.`;
-            document.getElementById('water-progress').style.width = Math.min((data.water_count / data.water_goal * 100), 100) + '%';
-            
-            // ОБНОВЛЕНИЕ ОГОНЬКА
-            const streakBadge = document.getElementById('streak-badge');
+
             if (data.streak > 0) {
-                streakBadge.classList.remove('hidden');
-                streakBadge.classList.add('flex');
+                document.getElementById('streak-badge').classList.replace('hidden', 'flex');
                 document.getElementById('streak-count').textContent = data.streak;
-            } else {
-                streakBadge.classList.add('hidden');
             }
 
-            completedTasksArray = data.completed_tasks ? data.completed_tasks.split(',') : [];
-            currentHabits = data.custom_habits ? JSON.parse(data.custom_habits) : defaultHabits;
-            renderHabits();
-            document.getElementById('splash-screen').style.opacity = '0';
-            setTimeout(() => document.getElementById('splash-screen').remove(), 500);
+            document.getElementById('splash-screen').style.display = 'none';
         }
 
-        async function loadHero() { const r = await fetch(`${backendUrl}/get_hero/${userId}`, {headers: reqHeaders}); if(r.ok) updateUI(await r.json()); }
-        async function drinkWater(btn) { btn.classList.add('btn-loading'); const r = await fetch(`${backendUrl}/drink_water/${userId}`, {method:'POST', headers: reqHeaders}); if(r.ok) updateUI(await r.json()); btn.classList.remove('btn-loading'); }
-        async function addXP(id, btn) { btn.classList.add('btn-loading'); const r = await fetch(`${backendUrl}/add_xp/${userId}?task_id=${id}`, {method:'POST', headers: reqHeaders}); if(r.ok) updateUI(await r.json()); btn.classList.remove('btn-loading'); }
-        
-        function toggleAccordion(cid, iid) {
-            const c = document.getElementById(cid); const i = document.getElementById(iid);
-            const isO = c.style.maxHeight && c.style.maxHeight !== '0px';
-            document.querySelectorAll('.accordion-content').forEach(el => el.style.maxHeight = '0px');
-            document.querySelectorAll('.chevron').forEach(el => el.classList.remove('rotate-180'));
-            if (!isO) { c.style.maxHeight = c.scrollHeight + 'px'; i.classList.add('rotate-180'); }
-        }
-
-        function showTab(name) {
-            ['tasks', 'shop', 'history', 'calc'].forEach(t => { 
-                document.getElementById('tab-'+t).classList.toggle('hidden', t !== name); 
-                document.getElementById('nav-'+t)?.classList.toggle('nav-active', t === name);
-            });
-            loadHero();
+        async function drinkWater(btn) {
+            btn.classList.add('btn-loading');
+            try {
+                const response = await fetch(`${backendUrl}/drink_water/${userId}`, {
+                    method: 'POST',
+                    headers: { 'X-TG-Data': tg.initData || "" }
+                });
+                if (response.ok) updateUI(await response.json());
+                else tg.showAlert("Ошибка: Запустите из Telegram");
+            } catch(e) { tg.showAlert("Нет связи с сервером"); }
+            finally { btn.classList.remove('btn-loading'); }
         }
 
         loadHero();
