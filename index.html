@@ -71,7 +71,7 @@
             <button onclick="addXP(150, 'task-run', 'Бег', this)" id="task-run" class="w-full p-4 bg-gray-800 rounded-xl border border-gray-700 flex justify-between items-center shadow-lg active:scale-[0.98]"><span class="font-bold text-sm">Бег</span><span class="text-emerald-400 font-black">+150 XP</span></button>
             <button onclick="addXP(200, 'task-strength', 'Силовая тренировка', this)" id="task-strength" class="w-full p-4 bg-gray-800 rounded-xl border border-gray-700 flex justify-between items-center shadow-lg active:scale-[0.98]"><span class="font-bold text-sm">Силовая тренировка</span><span class="text-emerald-400 font-black">+200 XP</span></button>
             <button onclick="addXP(150, 'task-cardio', 'Кардио', this)" id="task-cardio" class="w-full p-4 bg-gray-800 rounded-xl border border-gray-700 flex justify-between items-center shadow-lg active:scale-[0.98]"><span class="font-bold text-sm">Кардио</span><span class="text-emerald-400 font-black">+150 XP</span></button>
-            <button onclick="addXP(200, 'task-hiit', 'ВИИТ (Высоко интенсивная)', this)" id="task-hiit" class="w-full p-4 bg-gray-800 rounded-xl border border-gray-700 flex justify-between items-center shadow-lg active:scale-[0.98]"><span class="font-bold text-sm">ВИИТ</span><span class="text-emerald-400 font-black">+200 XP</span></button>
+            <button onclick="addXP(200, 'task-hiit', 'ВИИТ', this)" id="task-hiit" class="w-full p-4 bg-gray-800 rounded-xl border border-gray-700 flex justify-between items-center shadow-lg active:scale-[0.98]"><span class="font-bold text-sm">ВИИТ</span><span class="text-emerald-400 font-black">+200 XP</span></button>
         </div>
 
         <div id="menu-family" class="menu-category hidden space-y-2 mb-4 text-left">
@@ -134,9 +134,9 @@
         const rewards = [{ id: 'baton', name: 'Батончик', cost: 100, icon: '🍫' }, { id: 'soda', name: 'Газировка', cost: 150, icon: '🥤' }, { id: 'fast', name: 'Фаст Фуд', cost: 600, icon: '🍔' }];
         let shopState = {}; rewards.forEach(r => shopState[r.id] = 1);
 
-        // ПОСТОЯННАЯ СИНХРОНИЗАЦИЯ (Для решения проблемы ПК и свернутого телефона)
+        // ПОСТОЯННАЯ СИНХРОНИЗАЦИЯ
         window.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') loadHero(); });
-        setInterval(loadHero, 15000); // Автоматическое обновление каждые 15 секунд!
+        setInterval(loadHero, 15000); 
 
         function manualSync() {
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
@@ -182,11 +182,17 @@
             document.getElementById('water-text').textContent = `${data.water_count} / ${data.water_goal}`;
             document.getElementById('water-progress').style.width = Math.min((data.water_count / data.water_goal * 100), 100) + '%';
             
-            // Интерфейс Сна с исправленным часовым поясом
+            // ЖЕСТКИЙ ФИКС ВРЕМЕНИ ДЛЯ СНА
             const sleepBtn = document.getElementById('btn-sleep');
             const sleepStatus = document.getElementById('sleep-status');
             if (data.sleep_start) {
-                const date = new Date(data.sleep_start); // JS сам конвертирует UTC сервера в твое местное время!
+                let safeTimeStr = data.sleep_start;
+                // Если сервер отдал старое время без Z, принудительно делаем его UTC, чтобы телефон перевел в местное!
+                if (!safeTimeStr.includes('Z') && !safeTimeStr.includes('+')) {
+                    safeTimeStr += 'Z';
+                }
+                const date = new Date(safeTimeStr); 
+                
                 sleepBtn.innerHTML = 'Проснуться ☀️';
                 sleepBtn.className = "w-full rounded-xl p-4 font-black text-sm uppercase shadow-lg active:scale-95 transition-all flex justify-center items-center gap-2 sleep-active";
                 sleepStatus.classList.remove('hidden');
@@ -197,7 +203,18 @@
                 sleepStatus.classList.add('hidden');
             }
 
-            document.getElementById('history-list').innerHTML = data.history.map(h => `<div class="bg-gray-800/50 p-3 rounded-xl border border-gray-800 flex justify-between items-center shadow-sm"><div class="text-[11px] font-bold text-gray-200 text-left">${h.desc} <span class="text-[8px] text-gray-600 ml-1 font-mono uppercase">${h.time}</span></div><div class="font-black text-xs ${h.type === 'gain' ? 'text-emerald-400' : 'text-red-500'}">${h.type === 'gain' ? '+' : '-'}${h.amt}</div></div>`).join('');
+            document.getElementById('history-list').innerHTML = data.history.map(h => {
+                // Фикс времени для журнала
+                let hTimeStr = h.time;
+                if (!hTimeStr.includes('Z') && !hTimeStr.includes('+') && hTimeStr.includes('T')) hTimeStr += 'Z';
+                let displayTime = hTimeStr;
+                try {
+                    const hd = new Date(hTimeStr);
+                    if (!isNaN(hd)) displayTime = `${String(hd.getHours()).padStart(2,'0')}:${String(hd.getMinutes()).padStart(2,'0')}`;
+                } catch(e){}
+                
+                return `<div class="bg-gray-800/50 p-3 rounded-xl border border-gray-800 flex justify-between items-center shadow-sm"><div class="text-[11px] font-bold text-gray-200 text-left">${h.desc} <span class="text-[8px] text-gray-600 ml-1 font-mono uppercase">${displayTime}</span></div><div class="font-black text-xs ${h.type === 'gain' ? 'text-emerald-400' : 'text-red-500'}">${h.type === 'gain' ? '+' : '-'}${h.amt}</div></div>`;
+            }).join('');
             
             const done = data.completed_tasks.split(',');
             document.querySelectorAll('[id^="task-"]').forEach(btn => { const isDone = done.includes(btn.id); if (isDone) btn.classList.add('done-task'); else btn.classList.remove('done-task'); btn.disabled = isDone; });
@@ -224,7 +241,6 @@
             btn.classList.add('btn-loading');
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
             try {
-                // Передаем твой часовой пояс на сервер для точного расчета Окна мелатонина!
                 const tz = new Date().getTimezoneOffset();
                 const r = await fetch(`${backendUrl}/sleep_action/${username}?tz=${tz}`, {method:'POST'});
                 const data = await r.json();
