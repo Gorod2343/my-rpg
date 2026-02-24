@@ -60,7 +60,6 @@
             <h4 class="font-bold text-cyan-400 flex items-center gap-2">💧 База: Вода</h4>
             <span class="text-amber-400 text-sm font-bold">+5 Очков</span>
         </div>
-        
         <div class="flex items-center gap-4">
             <button id="btn-water" onclick="drinkWater()" class="bg-cyan-600 hover:bg-cyan-500 active:scale-95 transition-transform text-white w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-lg">
                 🥤
@@ -82,7 +81,6 @@
             <div class="text-emerald-400 mb-2 text-2xl">🏃‍♂️</div>
             <h3 class="font-bold">Активность</h3>
         </button>
-
         <button onclick="toggleMenu('menu-family')" class="min-w-[140px] bg-gray-800 p-4 rounded-2xl border border-gray-700 active:scale-95 transition-transform text-left shadow-md">
             <div class="text-blue-400 mb-2 text-2xl">👨‍👩‍👦</div>
             <h3 class="font-bold">Семья</h3>
@@ -131,16 +129,15 @@
         }
 
         const todayDate = new Date().toDateString();
-        // В памяти теперь хранится и счетчик воды
-        let savedData = JSON.parse(localStorage.getItem('rpgTasks_v5')) || { date: '', tasks: [], waterCount: 0 };
+        // Память телефона теперь хранит ТОЛЬКО галочки, вода удалена отсюда
+        let savedData = JSON.parse(localStorage.getItem('rpgTasks_v6')) || { date: '', tasks: [] };
 
         if (savedData.date !== todayDate) {
-            savedData = { date: todayDate, tasks: [], waterCount: 0 };
-            localStorage.setItem('rpgTasks_v5', JSON.stringify(savedData));
+            savedData = { date: todayDate, tasks: [] };
+            localStorage.setItem('rpgTasks_v6', JSON.stringify(savedData));
         }
 
         function loadSavedData() {
-            // Восстанавливаем галочки
             savedData.tasks.forEach(taskId => {
                 const checkbox = document.getElementById(taskId);
                 if (checkbox) {
@@ -149,69 +146,65 @@
                     checkbox.parentElement.style.opacity = '0.5';
                 }
             });
-            // Восстанавливаем воду
-            updateWaterUI();
         }
 
-        function updateWaterUI() {
-            document.getElementById('water-text').textContent = `${savedData.waterCount} / 8 стаканов`;
-            let percent = (savedData.waterCount / 8) * 100;
+        function updateWaterUI(count) {
+            document.getElementById('water-text').textContent = `${count} / 8 стаканов`;
+            let percent = (count / 8) * 100;
             document.getElementById('water-progress').style.width = percent + '%';
             
-            if (savedData.waterCount >= 8) {
-                const btn = document.getElementById('btn-water');
+            const btn = document.getElementById('btn-water');
+            if (count >= 8) {
                 btn.disabled = true;
                 btn.style.opacity = '0.5';
                 btn.innerHTML = '✅';
+            } else {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.innerHTML = '🥤';
             }
         }
 
-        function updateUI(total_xp, current_month_xp, last_month_xp, hp) {
+        function updateUI(total_xp, current_month_xp, last_month_xp, hp, water_count) {
             document.getElementById('total-xp').textContent = total_xp;
             document.getElementById('month-xp').textContent = current_month_xp; 
             document.getElementById('last-month-xp').textContent = last_month_xp;
             
-            // Здоровье
             document.getElementById('user-hp').textContent = hp;
             const hpBar = document.getElementById('hp-bar');
             hpBar.style.width = hp + '%';
             
             const warning = document.getElementById('debuff-warning');
-            
-            // ЛОГИКА ДЕБАФФА
             if (hp < 30) {
                 hpBar.className = "bg-gradient-to-r from-red-700 to-red-500 h-2.5 rounded-full animate-pulse transition-all duration-500";
-                warning.classList.remove('hidden'); // Показываем тревожную табличку
+                warning.classList.remove('hidden');
             } else {
                 hpBar.className = "bg-gradient-to-r from-red-500 to-rose-400 h-2.5 rounded-full transition-all duration-500";
-                warning.classList.add('hidden'); // Прячем табличку
+                warning.classList.add('hidden');
             }
+            
+            // Обновляем воду данными из базы!
+            updateWaterUI(water_count);
         }
 
         async function loadHero() {
             try {
                 let response = await fetch(`${backendUrl}/get_hero/${username}`);
                 let data = await response.json();
-                updateUI(data.total_xp, data.current_month_xp, data.last_month_xp, data.hp);
+                updateUI(data.total_xp, data.current_month_xp, data.last_month_xp, data.hp, data.water_count);
             } catch (error) {
                 console.error("Ошибка сервера", error);
             }
         }
 
         async function drinkWater() {
-            if (savedData.waterCount >= 8) return;
-            
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
             
-            savedData.waterCount += 1;
-            localStorage.setItem('rpgTasks_v5', JSON.stringify(savedData));
-            updateWaterUI();
-            
-            // Отправляем 5 очков на сервер без отключения кнопки
+            // Вместо того чтобы сохранять воду локально, отправляем запрос на сервер
             try {
-                let response = await fetch(`${backendUrl}/add_xp/${username}?amount=5`, { method: 'POST' });
+                let response = await fetch(`${backendUrl}/drink_water/${username}`, { method: 'POST' });
                 let data = await response.json();
-                updateUI(data.total_xp, data.current_month_xp, data.last_month_xp, data.hp);
+                updateUI(data.total_xp, data.current_month_xp, data.last_month_xp, data.hp, data.water_count);
             } catch (error) {
                 console.error("Ошибка сервера", error);
             }
@@ -227,13 +220,13 @@
 
             if (!savedData.tasks.includes(taskId)) {
                 savedData.tasks.push(taskId);
-                localStorage.setItem('rpgTasks_v5', JSON.stringify(savedData));
+                localStorage.setItem('rpgTasks_v6', JSON.stringify(savedData));
             }
 
             try {
                 let response = await fetch(`${backendUrl}/add_xp/${username}?amount=${amount}`, { method: 'POST' });
                 let data = await response.json();
-                updateUI(data.total_xp, data.current_month_xp, data.last_month_xp, data.hp);
+                updateUI(data.total_xp, data.current_month_xp, data.last_month_xp, data.hp, data.water_count);
             } catch (error) {
                 console.error("Ошибка сервера", error);
             }
