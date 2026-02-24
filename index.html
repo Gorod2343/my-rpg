@@ -22,17 +22,17 @@
             </div>
             <div>
                 <h1 id="user-name" class="text-xl font-bold">Загрузка...</h1>
-                <p class="text-amber-400 text-sm">Уровень 12</p>
+                <p id="user-level" class="text-amber-400 text-sm">Уровень 1</p>
             </div>
         </div>
         <div class="text-right">
             <p class="text-xs text-gray-400">Опыт</p>
-            <p class="font-bold">450 <span class="text-amber-400">XP</span></p>
+            <p class="font-bold"><span id="user-xp">0</span> <span class="text-amber-400">XP</span></p>
         </div>
     </div>
 
     <div class="w-full bg-gray-800 rounded-full h-3 mb-8">
-        <div class="bg-gradient-to-r from-amber-400 to-orange-500 h-3 rounded-full" style="width: 45%"></div>
+        <div id="xp-bar" class="bg-gradient-to-r from-amber-400 to-orange-500 h-3 rounded-full" style="width: 0%" style="transition: width 0.5s ease-in-out;"></div>
     </div>
 
     <h2 class="text-lg font-bold mb-4">Сферы жизни</h2>
@@ -41,25 +41,21 @@
         <button onclick="toggleMenu('menu-sport')" class="min-w-[140px] bg-gray-800 p-4 rounded-2xl border border-gray-700 active:scale-95 transition-transform text-left">
             <div class="text-orange-500 mb-2">💪</div>
             <h3 class="font-bold">Тренировка</h3>
-            <div class="w-full bg-gray-700 h-1 mt-3 rounded-full"><div class="bg-orange-500 h-1 rounded-full" style="width: 65%"></div></div>
         </button>
 
         <button onclick="toggleMenu('menu-family')" class="min-w-[140px] bg-gray-800 p-4 rounded-2xl border border-gray-700 active:scale-95 transition-transform text-left">
             <div class="text-blue-400 mb-2">👨‍👩‍👦</div>
             <h3 class="font-bold">Семья</h3>
-            <div class="w-full bg-gray-700 h-1 mt-3 rounded-full"><div class="bg-blue-400 h-1 rounded-full" style="width: 40%"></div></div>
         </button>
 
         <button onclick="toggleMenu('menu-rest')" class="min-w-[140px] bg-gray-800 p-4 rounded-2xl border border-gray-700 active:scale-95 transition-transform text-left">
             <div class="text-purple-400 mb-2">🎮</div>
             <h3 class="font-bold">Отдых</h3>
-            <div class="w-full bg-gray-700 h-1 mt-3 rounded-full"><div class="bg-purple-400 h-1 rounded-full" style="width: 80%"></div></div>
         </button>
         
         <button onclick="toggleMenu('menu-home')" class="min-w-[140px] bg-gray-800 p-4 rounded-2xl border border-gray-700 active:scale-95 transition-transform text-left">
             <div class="text-green-400 mb-2">🏠</div>
             <h3 class="font-bold">Быт</h3>
-            <div class="w-full bg-gray-700 h-1 mt-3 rounded-full"><div class="bg-green-400 h-1 rounded-full" style="width: 20%"></div></div>
         </button>
     </div>
 
@@ -67,13 +63,13 @@
         <h4 class="font-bold text-orange-500 mb-3">Задачи: Тренировка</h4>
         <div class="space-y-3">
             <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl">
-                <input type="checkbox" class="w-5 h-5 rounded text-orange-500">
+                <input type="checkbox" onclick="addXP(50, this)" class="w-5 h-5 rounded text-orange-500">
                 <span class="flex-1">Сделать отжимания</span>
                 <span class="text-amber-400 text-sm">+50 XP</span>
             </label>
             <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl">
-                <input type="checkbox" class="w-5 h-5 rounded text-orange-500">
-                <span class="flex-1">Упражнения на плечи с эспандером</span>
+                <input type="checkbox" onclick="addXP(80, this)" class="w-5 h-5 rounded text-orange-500">
+                <span class="flex-1">Упражнения с эспандером</span>
                 <span class="text-amber-400 text-sm">+80 XP</span>
             </label>
         </div>
@@ -83,13 +79,13 @@
         <h4 class="font-bold text-blue-400 mb-3">Задачи: Семья</h4>
         <div class="space-y-3">
             <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl">
-                <input type="checkbox" class="w-5 h-5 rounded text-blue-400">
+                <input type="checkbox" onclick="addXP(100, this)" class="w-5 h-5 rounded text-blue-400">
                 <span class="flex-1">Время с Витюшей и Димулей</span>
                 <span class="text-amber-400 text-sm">+100 XP</span>
             </label>
             <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl">
-                <input type="checkbox" class="w-5 h-5 rounded text-blue-400">
-                <span class="flex-1">Футбол и ниндзя-тренировка Вити</span>
+                <input type="checkbox" onclick="addXP(70, this)" class="w-5 h-5 rounded text-blue-400">
+                <span class="flex-1">Ниндзя-тренировка Вити</span>
                 <span class="text-amber-400 text-sm">+70 XP</span>
             </label>
         </div>
@@ -99,17 +95,12 @@
         <h4 class="font-bold text-purple-400 mb-3">Задачи: Отдых</h4>
         <div class="space-y-3">
             <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl">
-                <input type="checkbox" class="w-5 h-5 rounded text-purple-400">
+                <input type="checkbox" onclick="addXP(30, this)" class="w-5 h-5 rounded text-purple-400">
                 <span class="flex-1">Поиграть в приставку</span>
                 <span class="text-amber-400 text-sm">+30 XP</span>
             </label>
             <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl">
-                <input type="checkbox" class="w-5 h-5 rounded text-purple-400">
-                <span class="flex-1">Посмотреть хоррор</span>
-                <span class="text-amber-400 text-sm">+40 XP</span>
-            </label>
-            <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl">
-                <input type="checkbox" class="w-5 h-5 rounded text-purple-400">
+                <input type="checkbox" onclick="addXP(60, this)" class="w-5 h-5 rounded text-purple-400">
                 <span class="flex-1">Сыграть партию в «Мафию»</span>
                 <span class="text-amber-400 text-sm">+60 XP</span>
             </label>
@@ -120,7 +111,7 @@
         <h4 class="font-bold text-green-400 mb-3">Задачи: Быт</h4>
         <div class="space-y-3">
             <label class="flex items-center gap-3 p-3 bg-gray-700 rounded-xl">
-                <input type="checkbox" class="w-5 h-5 rounded text-green-400">
+                <input type="checkbox" onclick="addXP(20, this)" class="w-5 h-5 rounded text-green-400">
                 <span class="flex-1">Спрятать обои от Морти</span>
                 <span class="text-amber-400 text-sm">+20 XP</span>
             </label>
@@ -129,48 +120,75 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Разворачиваем на весь экран
+        tg.expand();
         
-        // --- МАГИЯ TELEGRAM API ---
-        // Пытаемся получить данные пользователя из Telegram
+        // ТВОЯ ССЫЛКА НА СЕРВЕР RENDER!
+        const backendUrl = "https://rpg-backend-yg16.onrender.com";
+        let username = "Гость";
+
+        // Получаем имя из Telegram
         const user = tg.initDataUnsafe?.user;
-
         if (user) {
-            // 1. Ставим настоящее имя
-            document.getElementById('user-name').textContent = user.first_name;
-
-            // 2. Разбираемся с аватаркой
+            username = user.first_name;
+            document.getElementById('user-name').textContent = username;
             const avatarContainer = document.getElementById('avatar-container');
-            
             if (user.photo_url) {
-                // Если у пользователя есть публичная аватарка, вставляем картинку
                 avatarContainer.innerHTML = `<img src="${user.photo_url}" alt="Avatar" class="w-full h-full object-cover">`;
             } else {
-                // Если аватарка скрыта настройками приватности, ставим первую букву его имени
-                document.getElementById('avatar-initial').textContent = user.first_name.charAt(0).toUpperCase();
+                document.getElementById('avatar-initial').textContent = username.charAt(0).toUpperCase();
             }
         } else {
-            // Если кто-то открыл ссылку просто в браузере, а не через Telegram
-            document.getElementById('user-name').textContent = "Гость";
+            document.getElementById('user-name').textContent = username;
         }
-        // --------------------------
 
-        // Логика плавного открытия подменю
+        // Обновление цифр на экране
+        function updateUI(xp, level) {
+            document.getElementById('user-level').textContent = `Уровень ${level}`;
+            document.getElementById('user-xp').textContent = xp;
+            let percent = (xp / 1000) * 100; // Считаем процент заполнения шкалы (1 уровень = 1000XP)
+            document.getElementById('xp-bar').style.width = `${percent}%`;
+        }
+
+        // Запрашиваем данные при входе в приложение
+        async function loadHero() {
+            try {
+                let response = await fetch(`${backendUrl}/get_hero/${username}`);
+                let data = await response.json();
+                updateUI(data.xp, data.level);
+            } catch (error) {
+                console.error("Ошибка связи с сервером", error);
+            }
+        }
+
+        // Отправляем выполненное задание на сервер
+        async function addXP(amount, element) {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            
+            // Прячем чекбокс, чтобы нельзя было накликать 100 раз по одному заданию
+            element.parentElement.style.opacity = '0.5';
+            element.disabled = true;
+
+            try {
+                let response = await fetch(`${backendUrl}/add_xp/${username}?amount=${amount}`, { method: 'POST' });
+                let data = await response.json();
+                updateUI(data.xp, data.level);
+            } catch (error) {
+                console.error("Ошибка сохранения опыта", error);
+            }
+        }
+
+        // Анимация меню
         function toggleMenu(menuId) {
             const allMenus = document.querySelectorAll('.submenu-enter');
             allMenus.forEach(menu => {
-                if(menu.id !== menuId) {
-                    menu.classList.remove('submenu-enter-active');
-                }
+                if(menu.id !== menuId) menu.classList.remove('submenu-enter-active');
             });
-            
-            const targetMenu = document.getElementById(menuId);
-            targetMenu.classList.toggle('submenu-enter-active');
-            
-            if (tg.HapticFeedback) {
-                tg.HapticFeedback.impactOccurred('light');
-            }
+            document.getElementById(menuId).classList.toggle('submenu-enter-active');
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
         }
+
+        // Запуск при старте!
+        loadHero();
     </script>
 </body>
 </html>
