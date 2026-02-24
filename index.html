@@ -7,10 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* Скрываем скроллбар для красоты, но оставляем прокрутку */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        /* Плавная анимация для подменю */
         .submenu-enter { max-height: 0; opacity: 0; overflow: hidden; transition: all 0.4s ease-out; }
         .submenu-enter-active { max-height: 500px; opacity: 1; margin-top: 1rem; }
     </style>
@@ -19,11 +17,11 @@
 
     <div class="flex justify-between items-center mb-6">
         <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center text-xl font-bold">
-                Г
+            <div id="avatar-container" class="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center text-xl font-bold overflow-hidden border border-gray-700">
+                <span id="avatar-initial">Г</span>
             </div>
             <div>
-                <h1 class="text-xl font-bold">Герой</h1>
+                <h1 id="user-name" class="text-xl font-bold">Загрузка...</h1>
                 <p class="text-amber-400 text-sm">Уровень 12</p>
             </div>
         </div>
@@ -40,7 +38,6 @@
     <h2 class="text-lg font-bold mb-4">Сферы жизни</h2>
 
     <div class="flex overflow-x-auto no-scrollbar gap-4 pb-2">
-        
         <button onclick="toggleMenu('menu-sport')" class="min-w-[140px] bg-gray-800 p-4 rounded-2xl border border-gray-700 active:scale-95 transition-transform text-left">
             <div class="text-orange-500 mb-2">💪</div>
             <h3 class="font-bold">Тренировка</h3>
@@ -131,12 +128,35 @@
     </div>
 
     <script>
-        // Инициализация Telegram Web App
-        window.Telegram.WebApp.expand(); // Разворачиваем на весь экран
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Разворачиваем на весь экран
         
+        // --- МАГИЯ TELEGRAM API ---
+        // Пытаемся получить данные пользователя из Telegram
+        const user = tg.initDataUnsafe?.user;
+
+        if (user) {
+            // 1. Ставим настоящее имя
+            document.getElementById('user-name').textContent = user.first_name;
+
+            // 2. Разбираемся с аватаркой
+            const avatarContainer = document.getElementById('avatar-container');
+            
+            if (user.photo_url) {
+                // Если у пользователя есть публичная аватарка, вставляем картинку
+                avatarContainer.innerHTML = `<img src="${user.photo_url}" alt="Avatar" class="w-full h-full object-cover">`;
+            } else {
+                // Если аватарка скрыта настройками приватности, ставим первую букву его имени
+                document.getElementById('avatar-initial').textContent = user.first_name.charAt(0).toUpperCase();
+            }
+        } else {
+            // Если кто-то открыл ссылку просто в браузере, а не через Telegram
+            document.getElementById('user-name').textContent = "Гость";
+        }
+        // --------------------------
+
         // Логика плавного открытия подменю
         function toggleMenu(menuId) {
-            // Закрываем все остальные меню
             const allMenus = document.querySelectorAll('.submenu-enter');
             allMenus.forEach(menu => {
                 if(menu.id !== menuId) {
@@ -144,13 +164,11 @@
                 }
             });
             
-            // Открываем или закрываем выбранное
             const targetMenu = document.getElementById(menuId);
             targetMenu.classList.toggle('submenu-enter-active');
             
-            // Легкая вибрация телефона при нажатии
-            if (window.Telegram.WebApp.HapticFeedback) {
-                window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('light');
             }
         }
     </script>
