@@ -214,3 +214,50 @@
                         <div class="flex items-center bg-gray-900 rounded-lg p-1 border border-gray-700 shadow-inner">
                             <button onclick="changeQty('${r.id}', -1)" class="w-10 h-10 font-bold text-gray-500 hover:text-white">-</button>
                             <span id="qty-${r.id}" class="w-6 text-center text-xs font-black text-white">${shopState[r.id]}</span>
+                            <button onclick="changeQty('${r.id}', 1)" class="w-10 h-10 font-bold text-gray-500 hover:text-white">+</button>
+                        </div>
+                        <button id="buy-btn-${r.id}" onclick="buy('${r.id}')" class="flex-1 bg-emerald-600 hover:bg-emerald-500 rounded-lg p-2 font-black text-[10px] uppercase shadow-lg active:scale-95 transition-all text-white">Купить: <span id="total-${r.id}">${r.cost * shopState[r.id]}</span> XP</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function toggleSleep() {
+            const btn = document.getElementById('btn-sleep');
+            btn.classList.add('btn-loading');
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
+            try {
+                const r = await fetch(`${backendUrl}/sleep_action/${username}`, {method:'POST'});
+                updateUI(await r.json());
+            } finally { btn.classList.remove('btn-loading'); }
+        }
+
+        async function buy(id) {
+            const r = rewards.find(i => i.id === id); const btn = document.getElementById(`buy-btn-${id}`);
+            btn.classList.add('btn-loading');
+            try {
+                const res = await fetch(`${backendUrl}/buy_reward/${username}?cost=${r.cost}&name=${r.name}&qty=${shopState[id]}`, {method:'POST'});
+                const data = await res.json();
+                if (data.error) { tg.showAlert(data.error); if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error'); }
+                else { updateUI(data); shopState[id] = 1; renderShop(); if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success'); }
+            } catch (e) { tg.showAlert("Ошибка сети"); } finally { btn.classList.remove('btn-loading'); }
+        }
+
+        function changeQty(id, delta) { shopState[id] = Math.max(1, shopState[id] + delta); const r = rewards.find(i => i.id === id); document.getElementById(`qty-${id}`).textContent = shopState[id]; document.getElementById(`total-${id}`).textContent = r.cost * shopState[id]; if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); }
+        
+        async function loadHero() { try { const r = await fetch(`${backendUrl}/get_hero/${username}`); updateUI(await r.json()); } catch (e) { console.log("Связь восстанавливается..."); } }
+        
+        async function addXP(amt, id, name, btn) { btn.classList.add('btn-loading'); if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium'); try { const r = await fetch(`${backendUrl}/add_xp/${username}?amount=${amt}&task_id=${id}&task_name=${name}`, {method:'POST'}); updateUI(await r.json()); } finally { btn.classList.remove('btn-loading'); } }
+        
+        async function drinkWater(btn) { btn.classList.add('btn-loading'); if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium'); try { const r = await fetch(`${backendUrl}/drink_water/${username}`, {method:'POST'}); updateUI(await r.json()); } finally { btn.classList.remove('btn-loading'); } }
+
+        function showTab(name) {
+            ['tasks', 'shop', 'history', 'calc'].forEach(t => { document.getElementById('tab-'+t).classList.toggle('hidden', t !== name); document.getElementById('nav-'+t).classList.toggle('tab-active', t === name); document.getElementById('nav-'+t).classList.toggle('text-gray-500', t !== name); });
+            if (name === 'shop') renderShop();
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        }
+
+        loadHero();
+    </script>
+</body>
+</html>
