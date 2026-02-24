@@ -23,7 +23,7 @@
         .pulse-icon { animation: pulse-scale 1.5s infinite ease-in-out; }
         @keyframes pulse-scale { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.15); opacity: 0.7; } }
         
-        /* Анимации синего свечения (как в Prosto) */
+        /* Анимации синего свечения */
         @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); } 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); } }
         
         /* Аккордеон (Категории) */
@@ -57,7 +57,7 @@
         </div>
     </div>
 
-    <div id="tab-tasks" class="space-y-8">
+    <div id="tab-tasks" class="space-y-6">
         
         <div class="prosto-card p-6 relative overflow-hidden text-center">
             <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-600/20 rounded-full blur-3xl"></div>
@@ -66,8 +66,8 @@
         </div>
 
         <div>
-            <div class="flex items-center gap-3 mb-4 pl-2">
-                <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold shadow-[0_0_10px_rgba(37,99,235,0.4)]">1</div>
+            <div class="flex items-center gap-3 mb-4 pl-1">
+                <div class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold shadow-[0_0_10px_rgba(37,99,235,0.4)]">1</div>
                 <h2 class="text-lg font-bold">Базовый фундамент</h2>
             </div>
 
@@ -110,92 +110,78 @@
             </div>
         </div>
 
-        <div>
-            <div class="flex items-center gap-3 mb-4 pl-2 mt-8">
-                <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold shadow-[0_0_10px_rgba(37,99,235,0.4)]">2</div>
-                <h2 class="text-lg font-bold">Физическая активность</h2>
-            </div>
+        <div class="prosto-card overflow-hidden mt-8">
+            <button onclick="toggleAccordion('acc-sport', 'icon-sport')" class="w-full p-5 flex justify-between items-center bg-[#161b22] hover:bg-white/5 transition-colors">
+                <div class="flex items-center gap-3">
+                    <div class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold shadow-[0_0_10px_rgba(37,99,235,0.4)] shrink-0">2</div>
+                    <div class="text-left pl-1">
+                        <div class="font-bold text-white text-base">Физическая активность</div>
+                        <div class="text-[10px] text-gray-400 uppercase font-semibold mt-0.5 tracking-wider">Бег, Силовая, Кардио, ВИИТ</div>
+                    </div>
+                </div>
+                <svg id="icon-sport" class="w-6 h-6 text-gray-500 chevron shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
             
-            <div class="prosto-card overflow-hidden">
-                <button onclick="toggleAccordion('acc-sport', 'icon-sport')" class="w-full p-5 flex justify-between items-center bg-[#161b22] hover:bg-white/5 transition-colors">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-xl">🏃‍♂️</div>
-                        <div class="text-left">
-                            <div class="font-bold text-white text-base">Тренировки</div>
-                            <div class="text-[10px] text-gray-500 uppercase font-semibold mt-0.5">4 вида активности</div>
+            <div id="acc-sport" class="accordion-content bg-[#0c1017]/30 border-t border-gray-800/50">
+                <div class="p-2 space-y-1">
+                    <button onclick="addXP(150, 'task-run', 'Бег', this)" id="task-run" class="w-full text-left flex items-start gap-4 p-4 hover:bg-white/5 rounded-xl transition-colors">
+                        <div class="status-circle mt-1 w-5 h-5 rounded-full border-2 border-gray-600 shrink-0 flex items-center justify-center transition-colors"></div>
+                        <div class="flex-1">
+                            <span class="inline-block px-2 py-0.5 bg-gray-800 text-gray-300 text-[9px] rounded-full font-bold uppercase tracking-wider mb-1.5">Кардио</span>
+                            <div class="font-bold text-sm text-white">Пробежка</div>
                         </div>
-                    </div>
-                    <svg id="icon-sport" class="w-6 h-6 text-gray-500 chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                </button>
-                
-                <div id="acc-sport" class="accordion-content bg-[#0c1017]/30">
-                    <div class="p-2 space-y-1">
-                        <button onclick="addXP(150, 'task-run', 'Бег', this)" id="task-run" class="w-full text-left flex items-start gap-4 p-4 hover:bg-white/5 rounded-xl transition-colors">
-                            <div class="status-circle mt-1 w-5 h-5 rounded-full border-2 border-gray-600 shrink-0 flex items-center justify-center transition-colors"></div>
-                            <div class="flex-1">
-                                <span class="inline-block px-2 py-0.5 bg-gray-800 text-gray-300 text-[9px] rounded-full font-bold uppercase tracking-wider mb-1.5">Кардио</span>
-                                <div class="font-bold text-sm text-white">Пробежка</div>
-                            </div>
-                            <div class="text-blue-400 font-bold text-xs">+150 XP</div>
-                        </button>
-                        <button onclick="addXP(200, 'task-strength', 'Силовая', this)" id="task-strength" class="w-full text-left flex items-start gap-4 p-4 hover:bg-white/5 rounded-xl transition-colors">
-                            <div class="status-circle mt-1 w-5 h-5 rounded-full border-2 border-gray-600 shrink-0 flex items-center justify-center transition-colors"></div>
-                            <div class="flex-1">
-                                <span class="inline-block px-2 py-0.5 bg-gray-800 text-gray-300 text-[9px] rounded-full font-bold uppercase tracking-wider mb-1.5">Сила</span>
-                                <div class="font-bold text-sm text-white">Силовая тренировка</div>
-                            </div>
-                            <div class="text-blue-400 font-bold text-xs">+200 XP</div>
-                        </button>
-                        <button onclick="addXP(150, 'task-cardio', 'Кардио', this)" id="task-cardio" class="w-full text-left flex items-start gap-4 p-4 hover:bg-white/5 rounded-xl transition-colors">
-                            <div class="status-circle mt-1 w-5 h-5 rounded-full border-2 border-gray-600 shrink-0 flex items-center justify-center transition-colors"></div>
-                            <div class="flex-1">
-                                <span class="inline-block px-2 py-0.5 bg-gray-800 text-gray-300 text-[9px] rounded-full font-bold uppercase tracking-wider mb-1.5">Выносливость</span>
-                                <div class="font-bold text-sm text-white">Кардио сессия</div>
-                            </div>
-                            <div class="text-blue-400 font-bold text-xs">+150 XP</div>
-                        </button>
-                        <button onclick="addXP(200, 'task-hiit', 'ВИИТ', this)" id="task-hiit" class="w-full text-left flex items-start gap-4 p-4 hover:bg-white/5 rounded-xl transition-colors">
-                            <div class="status-circle mt-1 w-5 h-5 rounded-full border-2 border-gray-600 shrink-0 flex items-center justify-center transition-colors"></div>
-                            <div class="flex-1">
-                                <span class="inline-block px-2 py-0.5 bg-gray-800 text-gray-300 text-[9px] rounded-full font-bold uppercase tracking-wider mb-1.5">Интенсив</span>
-                                <div class="font-bold text-sm text-white">ВИИТ</div>
-                            </div>
-                            <div class="text-blue-400 font-bold text-xs">+200 XP</div>
-                        </button>
-                    </div>
+                        <div class="text-blue-400 font-bold text-xs">+150 XP</div>
+                    </button>
+                    <button onclick="addXP(200, 'task-strength', 'Силовая', this)" id="task-strength" class="w-full text-left flex items-start gap-4 p-4 hover:bg-white/5 rounded-xl transition-colors">
+                        <div class="status-circle mt-1 w-5 h-5 rounded-full border-2 border-gray-600 shrink-0 flex items-center justify-center transition-colors"></div>
+                        <div class="flex-1">
+                            <span class="inline-block px-2 py-0.5 bg-gray-800 text-gray-300 text-[9px] rounded-full font-bold uppercase tracking-wider mb-1.5">Сила</span>
+                            <div class="font-bold text-sm text-white">Силовая тренировка</div>
+                        </div>
+                        <div class="text-blue-400 font-bold text-xs">+200 XP</div>
+                    </button>
+                    <button onclick="addXP(150, 'task-cardio', 'Кардио', this)" id="task-cardio" class="w-full text-left flex items-start gap-4 p-4 hover:bg-white/5 rounded-xl transition-colors">
+                        <div class="status-circle mt-1 w-5 h-5 rounded-full border-2 border-gray-600 shrink-0 flex items-center justify-center transition-colors"></div>
+                        <div class="flex-1">
+                            <span class="inline-block px-2 py-0.5 bg-gray-800 text-gray-300 text-[9px] rounded-full font-bold uppercase tracking-wider mb-1.5">Выносливость</span>
+                            <div class="font-bold text-sm text-white">Кардио сессия</div>
+                        </div>
+                        <div class="text-blue-400 font-bold text-xs">+150 XP</div>
+                    </button>
+                    <button onclick="addXP(200, 'task-hiit', 'ВИИТ', this)" id="task-hiit" class="w-full text-left flex items-start gap-4 p-4 hover:bg-white/5 rounded-xl transition-colors">
+                        <div class="status-circle mt-1 w-5 h-5 rounded-full border-2 border-gray-600 shrink-0 flex items-center justify-center transition-colors"></div>
+                        <div class="flex-1">
+                            <span class="inline-block px-2 py-0.5 bg-gray-800 text-gray-300 text-[9px] rounded-full font-bold uppercase tracking-wider mb-1.5">Интенсив</span>
+                            <div class="font-bold text-sm text-white">ВИИТ</div>
+                        </div>
+                        <div class="text-blue-400 font-bold text-xs">+200 XP</div>
+                    </button>
                 </div>
             </div>
         </div>
 
-        <div>
-            <div class="flex items-center gap-3 mb-4 pl-2 mt-8">
-                <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold shadow-[0_0_10px_rgba(37,99,235,0.4)]">3</div>
-                <h2 class="text-lg font-bold">Отношения</h2>
-            </div>
+        <div class="prosto-card overflow-hidden mt-8">
+            <button onclick="toggleAccordion('acc-family', 'icon-family')" class="w-full p-5 flex justify-between items-center bg-[#161b22] hover:bg-white/5 transition-colors">
+                <div class="flex items-center gap-3">
+                    <div class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold shadow-[0_0_10px_rgba(37,99,235,0.4)] shrink-0">3</div>
+                    <div class="text-left pl-1">
+                        <div class="font-bold text-white text-base">Отношения</div>
+                        <div class="text-[10px] text-gray-400 uppercase font-semibold mt-0.5 tracking-wider">Качественное время вместе</div>
+                    </div>
+                </div>
+                <svg id="icon-family" class="w-6 h-6 text-gray-500 chevron shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
             
-            <div class="prosto-card overflow-hidden">
-                <button onclick="toggleAccordion('acc-family', 'icon-family')" class="w-full p-5 flex justify-between items-center bg-[#161b22] hover:bg-white/5 transition-colors">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-xl">👨‍👩‍👦</div>
-                        <div class="text-left">
-                            <div class="font-bold text-white text-base">Семья</div>
-                            <div class="text-[10px] text-gray-500 uppercase font-semibold mt-0.5">Качественное время</div>
+            <div id="acc-family" class="accordion-content bg-[#0c1017]/30 border-t border-gray-800/50">
+                <div class="p-2">
+                    <button onclick="addXP(100, 'task-kids', 'С детьми', this)" id="task-kids" class="w-full text-left flex items-start gap-4 p-4 hover:bg-white/5 rounded-xl transition-colors">
+                        <div class="status-circle mt-1 w-5 h-5 rounded-full border-2 border-gray-600 shrink-0 flex items-center justify-center transition-colors"></div>
+                        <div class="flex-1">
+                            <span class="inline-block px-2 py-0.5 bg-gray-800 text-gray-300 text-[9px] rounded-full font-bold uppercase tracking-wider mb-1.5">Связь</span>
+                            <div class="font-bold text-sm text-white">Витюша и Димуля</div>
                         </div>
-                    </div>
-                    <svg id="icon-family" class="w-6 h-6 text-gray-500 chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                </button>
-                
-                <div id="acc-family" class="accordion-content bg-[#0c1017]/30">
-                    <div class="p-2">
-                        <button onclick="addXP(100, 'task-kids', 'С детьми', this)" id="task-kids" class="w-full text-left flex items-start gap-4 p-4 hover:bg-white/5 rounded-xl transition-colors">
-                            <div class="status-circle mt-1 w-5 h-5 rounded-full border-2 border-gray-600 shrink-0 flex items-center justify-center transition-colors"></div>
-                            <div class="flex-1">
-                                <span class="inline-block px-2 py-0.5 bg-gray-800 text-gray-300 text-[9px] rounded-full font-bold uppercase tracking-wider mb-1.5">Связь</span>
-                                <div class="font-bold text-sm text-white">Витюша и Димуля</div>
-                            </div>
-                            <div class="text-blue-400 font-bold text-xs">+100 XP</div>
-                        </button>
-                    </div>
+                        <div class="text-blue-400 font-bold text-xs">+100 XP</div>
+                    </button>
                 </div>
             </div>
         </div>
@@ -243,7 +229,7 @@
                 <select id="calc-activity" class="w-full bg-[#0c1017] border border-gray-800 rounded-xl p-3 text-sm text-white outline-none focus:border-blue-500 transition-colors">
                     <option value="30">Низкая (30 мл/кг)</option>
                     <option value="35">Средняя (35 мл/кг)</option>
-                    <option value="40" selected>Высокая / Бег (40 мл/кг)</option>
+                    <option value="40" selected>Спорт / Бег (40 мл/кг)</option>
                 </select>
             </div>
             <div id="bmi-block" class="hidden bg-blue-900/20 border border-blue-800/50 p-4 rounded-xl mt-4">
@@ -284,15 +270,18 @@
         const rewards = [{ id: 'baton', name: 'Батончик', cost: 100, icon: '🍫' }, { id: 'soda', name: 'Газировка', cost: 150, icon: '🥤' }, { id: 'fast', name: 'Фаст Фуд', cost: 600, icon: '🍔' }];
         let shopState = {}; rewards.forEach(r => shopState[r.id] = 1);
 
-        // Функция открытия/закрытия аккордеона (Категорий)
+        // Функция открытия/закрытия аккордеона (С умным закрытием остальных)
         function toggleAccordion(contentId, iconId) {
             const content = document.getElementById(contentId);
             const icon = document.getElementById(iconId);
-            
-            if (content.style.maxHeight && content.style.maxHeight !== '0px') {
-                content.style.maxHeight = '0px';
-                icon.classList.remove('rotate-180');
-            } else {
+            const isClosing = content.style.maxHeight && content.style.maxHeight !== '0px';
+
+            // Закрываем все открытые аккордеоны
+            document.querySelectorAll('.accordion-content').forEach(el => { el.style.maxHeight = '0px'; });
+            document.querySelectorAll('.chevron').forEach(el => { el.classList.remove('rotate-180'); });
+
+            // Если мы не закрывали текущий, то открываем его
+            if (!isClosing) {
                 content.style.maxHeight = content.scrollHeight + 'px';
                 icon.classList.add('rotate-180');
             }
@@ -447,7 +436,7 @@
                 const data = await r.json();
                 updateUI(data); 
                 
-                // УБИРАЕМ ЗАГРУЗОЧНЫЙ ЭКРАН ПОСЛЕ ЗАГРУЗКИ ДАННЫХ
+                // УБИРАЕМ ЗАГРУЗОЧНЫЙ ЭКРАН С АНИМАЦИЕЙ
                 const splash = document.getElementById('splash-screen');
                 if (splash) {
                     splash.style.opacity = '0';
