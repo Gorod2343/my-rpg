@@ -22,7 +22,7 @@
             <div id="avatar-container" onclick="manualSync()" class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center font-bold border border-gray-700 shadow-lg overflow-hidden text-lg active:scale-90 transition-transform cursor-pointer">А</div>
             <div>
                 <h1 id="user-name" class="text-base font-bold text-white leading-none">Александр</h1>
-                <p class="text-[9px] text-gray-500 uppercase font-black mt-1">Всего XP: <span id="total-xp" class="text-gray-300">0</span></p>
+                <p class="text-[9px] text-gray-500 uppercase font-black mt-1">Всего очков: <span id="total-xp" class="text-gray-300">0</span></p>
             </div>
         </div>
         <div class="text-right">
@@ -33,14 +33,14 @@
 
     <div id="tab-tasks">
         <div class="bg-gray-800 rounded-[2rem] p-6 mb-4 border border-gray-700 shadow-xl text-center">
-            <p class="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-1">Опыт в месяц</p>
+            <p class="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-1">Очков в месяц</p>
             <h2 id="month-xp" class="text-6xl font-black text-emerald-400">0</h2>
         </div>
 
         <div class="bg-gray-800 rounded-2xl p-4 mb-4 border border-gray-700 shadow-md">
             <div class="flex justify-between items-center mb-3">
                 <span class="text-xs font-black text-indigo-400 tracking-widest uppercase">🛏️ БАЗА: СОН (AASM)</span>
-                <span class="text-emerald-400 font-bold text-[10px]">до +100 XP</span>
+                <span class="text-emerald-400 font-bold text-[10px]">до +100 Очков</span>
             </div>
             <button id="btn-sleep" onclick="toggleSleep()" class="w-full bg-indigo-600 rounded-xl p-4 font-black text-sm uppercase shadow-lg active:scale-95 transition-all flex justify-center items-center gap-2">
                 Уснуть 🌙
@@ -51,7 +51,7 @@
         <div class="bg-gray-800 rounded-2xl p-4 mb-6 border border-gray-700 shadow-md">
             <div class="flex justify-between items-center mb-3">
                 <span class="text-xs font-black text-cyan-400 tracking-widest uppercase">💧 БАЗА: ВОДА</span>
-                <span class="text-emerald-400 font-bold text-xs">+5 XP</span>
+                <span class="text-emerald-400 font-bold text-xs">+5 Очков</span>
             </div>
             <div class="flex items-center gap-4">
                 <button id="btn-water" onclick="drinkWater(this)" class="bg-cyan-600 w-12 h-12 rounded-xl text-xl shadow-lg active:scale-90 transition-all">🥤</button>
@@ -68,21 +68,21 @@
         </div>
 
         <div id="menu-sport" class="menu-category hidden space-y-2 mb-4 text-left">
-            <button onclick="addXP(150, 'task-run', 'Бег', this)" id="task-run" class="w-full p-4 bg-gray-800 rounded-xl border border-gray-700 flex justify-between items-center shadow-lg active:scale-[0.98]"><span class="font-bold text-sm">Бег</span><span class="text-emerald-400 font-black">+150 XP</span></button>
-            <button onclick="addXP(200, 'task-strength', 'Силовая тренировка', this)" id="task-strength" class="w-full p-4 bg-gray-800 rounded-xl border border-gray-700 flex justify-between items-center shadow-lg active:scale-[0.98]"><span class="font-bold text-sm">Силовая тренировка</span><span class="text-emerald-400 font-black">+200 XP</span></button>
-            <button onclick="addXP(150, 'task-cardio', 'Кардио', this)" id="task-cardio" class="w-full p-4 bg-gray-800 rounded-xl border border-gray-700 flex justify-between items-center shadow-lg active:scale-[0.98]"><span class="font-bold text-sm">Кардио</span><span class="text-emerald-400 font-black">+150 XP</span></button>
-            <button onclick="addXP(200, 'task-hiit', 'ВИИТ', this)" id="task-hiit" class="w-full p-4 bg-gray-800 rounded-xl border border-gray-700 flex justify-between items-center shadow-lg active:scale-[0.98]"><span class="font-bold text-sm">ВИИТ</span><span class="text-emerald-400 font-black">+200 XP</span></button>
+            <button onclick="addXP(150, 'task-run', 'Бег', this)" id="task-run" class="w-full p-4 bg-gray-800 rounded-xl border border-gray-700 flex justify-between items-center shadow-lg active:scale-[0.98]"><span class="font-bold text-sm">Бег</span><span class="text-emerald-400 font-black">+150 Очков</span></button>
+            <button onclick="addXP(200, 'task-strength', 'Силовая тренировка', this)" id="task-strength" class="w-full p-4 bg-gray-800 rounded-xl border border-gray-700 flex justify-between items-center shadow-lg active:scale-[0.98]"><span class="font-bold text-sm">Силовая тренировка</span><span class="text-emerald-400 font-black">+200 Очков</span></button>
+            <button onclick="addXP(150, 'task-cardio', 'Кардио', this)" id="task-cardio" class="w-full p-4 bg-gray-800 rounded-xl border border-gray-700 flex justify-between items-center shadow-lg active:scale-[0.98]"><span class="font-bold text-sm">Кардио</span><span class="text-emerald-400 font-black">+150 Очков</span></button>
+            <button onclick="addXP(200, 'task-hiit', 'ВИИТ', this)" id="task-hiit" class="w-full p-4 bg-gray-800 rounded-xl border border-gray-700 flex justify-between items-center shadow-lg active:scale-[0.98]"><span class="font-bold text-sm">ВИИТ</span><span class="text-emerald-400 font-black">+200 Очков</span></button>
         </div>
 
         <div id="menu-family" class="menu-category hidden space-y-2 mb-4 text-left">
-            <button onclick="addXP(100, 'task-kids', 'Время с детьми', this)" id="task-kids" class="w-full p-4 bg-gray-800 rounded-xl border border-gray-700 flex justify-between items-center shadow-lg active:scale-[0.98]"><span class="font-bold text-sm text-left">Витюша и Димуля</span><span class="text-emerald-400 font-black">+100 XP</span></button>
+            <button onclick="addXP(100, 'task-kids', 'Время с детьми', this)" id="task-kids" class="w-full p-4 bg-gray-800 rounded-xl border border-gray-700 flex justify-between items-center shadow-lg active:scale-[0.98]"><span class="font-bold text-sm text-left">Витюша и Димуля</span><span class="text-emerald-400 font-black">+100 Очков</span></button>
         </div>
     </div>
 
     <div id="tab-shop" class="hidden">
         <div class="bg-gray-800 rounded-2xl p-5 mb-6 border border-gray-700 shadow-md text-center">
             <p class="text-gray-400 text-[10px] uppercase font-black tracking-widest mb-1">Доступно для трат</p>
-            <h2 id="shop-balance" class="text-4xl font-black text-amber-400">0 XP</h2>
+            <h2 id="shop-balance" class="text-4xl font-black text-amber-400">0 Очков</h2>
         </div>
         <div id="shop-items" class="space-y-4"></div>
     </div>
@@ -134,9 +134,24 @@
         const rewards = [{ id: 'baton', name: 'Батончик', cost: 100, icon: '🍫' }, { id: 'soda', name: 'Газировка', cost: 150, icon: '🥤' }, { id: 'fast', name: 'Фаст Фуд', cost: 600, icon: '🍔' }];
         let shopState = {}; rewards.forEach(r => shopState[r.id] = 1);
 
-        // ПОСТОЯННАЯ СИНХРОНИЗАЦИЯ
+        // ЗАГРУЗКА ДАННЫХ КАЛЬКУЛЯТОРА ИЗ ПАМЯТИ ТЕЛЕФОНА
+        function loadCalcDefaults() {
+            const w = localStorage.getItem('rpg_weight');
+            const h = localStorage.getItem('rpg_height');
+            const a = localStorage.getItem('rpg_activity');
+
+            if (w) document.getElementById('calc-weight').value = w;
+            if (h) document.getElementById('calc-height').value = h;
+            if (a) document.getElementById('calc-activity').value = a;
+
+            if (w && h) {
+                const bmi = (w / Math.pow(h / 100, 2)).toFixed(1);
+                document.getElementById('bmi-res').classList.remove('hidden');
+                document.getElementById('bmi-res').textContent = `Индекс Массы Тела (BMI): ${bmi}`;
+            }
+        }
+
         window.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') loadHero(); });
-        setInterval(loadHero, 15000); 
 
         function manualSync() {
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
@@ -153,7 +168,13 @@
             const w = parseFloat(document.getElementById('calc-weight').value);
             const h = parseFloat(document.getElementById('calc-height').value);
             const a = parseFloat(document.getElementById('calc-activity').value);
+            
             if (w > 0) {
+                // СОХРАНЯЕМ В ПАМЯТЬ ТЕЛЕФОНА НАВСЕГДА
+                localStorage.setItem('rpg_weight', w);
+                if (h > 0) localStorage.setItem('rpg_height', h);
+                localStorage.setItem('rpg_activity', a);
+
                 if (h > 0) {
                     const bmi = (w / Math.pow(h / 100, 2)).toFixed(1);
                     document.getElementById('bmi-res').classList.remove('hidden');
@@ -175,22 +196,18 @@
         function updateUI(data) {
             document.getElementById('total-xp').textContent = data.total_xp;
             document.getElementById('month-xp').textContent = data.current_month_xp;
-            document.getElementById('shop-balance').textContent = data.current_month_xp + " XP"; 
+            document.getElementById('shop-balance').textContent = data.current_month_xp + " Очков"; 
             document.getElementById('user-hp').textContent = data.hp;
             document.getElementById('hp-bar').style.width = data.hp + '%';
             
             document.getElementById('water-text').textContent = `${data.water_count} / ${data.water_goal}`;
             document.getElementById('water-progress').style.width = Math.min((data.water_count / data.water_goal * 100), 100) + '%';
             
-            // ЖЕСТКИЙ ФИКС ВРЕМЕНИ ДЛЯ СНА
             const sleepBtn = document.getElementById('btn-sleep');
             const sleepStatus = document.getElementById('sleep-status');
             if (data.sleep_start) {
                 let safeTimeStr = data.sleep_start;
-                // Если сервер отдал старое время без Z, принудительно делаем его UTC, чтобы телефон перевел в местное!
-                if (!safeTimeStr.includes('Z') && !safeTimeStr.includes('+')) {
-                    safeTimeStr += 'Z';
-                }
+                if (!safeTimeStr.includes('Z') && !safeTimeStr.includes('+')) safeTimeStr += 'Z';
                 const date = new Date(safeTimeStr); 
                 
                 sleepBtn.innerHTML = 'Проснуться ☀️';
@@ -204,7 +221,6 @@
             }
 
             document.getElementById('history-list').innerHTML = data.history.map(h => {
-                // Фикс времени для журнала
                 let hTimeStr = h.time;
                 if (!hTimeStr.includes('Z') && !hTimeStr.includes('+') && hTimeStr.includes('T')) hTimeStr += 'Z';
                 let displayTime = hTimeStr;
@@ -223,14 +239,14 @@
         function renderShop() {
             document.getElementById('shop-items').innerHTML = rewards.map(r => `
                 <div class="bg-gray-800 rounded-2xl p-4 border border-gray-700 shadow-md">
-                    <div class="flex justify-between mb-3 text-left"><div class="flex items-center gap-3"><span class="text-2xl">${r.icon}</span><span class="font-bold text-sm text-white">${r.name}</span></div><div class="text-amber-400 font-black text-xs mt-1">${r.cost} XP / шт</div></div>
+                    <div class="flex justify-between mb-3 text-left"><div class="flex items-center gap-3"><span class="text-2xl">${r.icon}</span><span class="font-bold text-sm text-white">${r.name}</span></div><div class="text-amber-400 font-black text-xs mt-1">${r.cost} Очков / шт</div></div>
                     <div class="flex items-center gap-2">
                         <div class="flex items-center bg-gray-900 rounded-lg p-1 border border-gray-700 shadow-inner">
                             <button onclick="changeQty('${r.id}', -1)" class="w-10 h-10 font-bold text-gray-500 hover:text-white">-</button>
                             <span id="qty-${r.id}" class="w-6 text-center text-xs font-black text-white">${shopState[r.id]}</span>
                             <button onclick="changeQty('${r.id}', 1)" class="w-10 h-10 font-bold text-gray-500 hover:text-white">+</button>
                         </div>
-                        <button id="buy-btn-${r.id}" onclick="buy('${r.id}')" class="flex-1 bg-emerald-600 hover:bg-emerald-500 rounded-lg p-2 font-black text-[10px] uppercase shadow-lg active:scale-95 transition-all text-white">Купить: <span id="total-${r.id}">${r.cost * shopState[r.id]}</span> XP</button>
+                        <button id="buy-btn-${r.id}" onclick="buy('${r.id}')" class="flex-1 bg-emerald-600 hover:bg-emerald-500 rounded-lg p-2 font-black text-[10px] uppercase shadow-lg active:scale-95 transition-all text-white">Купить: <span id="total-${r.id}">${r.cost * shopState[r.id]}</span> Очков</button>
                     </div>
                 </div>
             `).join('');
@@ -272,9 +288,11 @@
         function showTab(name) {
             ['tasks', 'shop', 'history', 'calc'].forEach(t => { document.getElementById('tab-'+t).classList.toggle('hidden', t !== name); document.getElementById('nav-'+t).classList.toggle('tab-active', t === name); document.getElementById('nav-'+t).classList.toggle('text-gray-500', t !== name); });
             if (name === 'shop') renderShop();
+            loadHero();
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
         }
 
+        loadCalcDefaults(); // Загружаем ИМТ и настройки из памяти
         loadHero();
     </script>
 </body>
