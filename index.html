@@ -187,11 +187,12 @@
         tg.expand();
         const backendUrl = "https://rpg-backend-yg16.onrender.com";
         
-        // --- СИСТЕМА ИДЕНТИФИКАЦИИ (SaaS) ---
-        // Теперь мы используем уникальный ID телеграма, а не просто Имя.
         let userId = "guest_123";
         let firstName = "Гость";
         
+        // Получаем секретные данные от Телеграма для анти-чита
+        let tgInitData = tg.initData || ""; 
+
         if(tg.initDataUnsafe?.user) {
             userId = tg.initDataUnsafe.user.id.toString();
             firstName = tg.initDataUnsafe.user.first_name;
@@ -199,10 +200,15 @@
         }
         document.getElementById('user-name').textContent = firstName;
 
+        // Создаем заголовки с подписью для сервера
+        const reqHeaders = {
+            'Content-Type': 'application/json',
+            'X-TG-Data': tgInitData
+        };
+
         const rewards = [{ id: 'baton', name: 'Батончик', cost: 100, icon: '🍫' }, { id: 'soda', name: 'Газировка', cost: 150, icon: '🥤' }, { id: 'fast', name: 'Фаст Фуд', cost: 600, icon: '🍔' }];
         let shopState = {}; rewards.forEach(r => shopState[r.id] = 1);
 
-        // УНИВЕРСАЛЬНЫЙ ШАБЛОН ДЛЯ ВСЕХ
         const defaultHabits = [
             { id: 'task-run', cat: 'sport', tag: 'Кардио', name: 'Пробежка', xp: 150 },
             { id: 'task-strength', cat: 'sport', tag: 'Сила', name: 'Силовая тренировка', xp: 200 },
@@ -223,8 +229,9 @@
                 const circleClass = isDone ? 'bg-blue-600' : 'border-gray-600 border-2';
                 const svg = isDone ? '<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>' : '';
                 
+                // ВАЖНО: Мы больше не передаем очки и название в функцию addXP, только ID задачи!
                 const html = `
-                    <button onclick="addXP(${h.xp}, '${h.id}', '${h.name}', this)" id="${h.id}" class="w-full text-left flex items-start gap-4 p-4 hover:bg-white/5 rounded-xl transition-colors ${doneClass}" ${isDone ? 'disabled' : ''}>
+                    <button onclick="addXP('${h.id}', this)" id="${h.id}" class="w-full text-left flex items-start gap-4 p-4 hover:bg-white/5 rounded-xl transition-colors ${doneClass}" ${isDone ? 'disabled' : ''}>
                         <div class="status-circle mt-1 w-5 h-5 rounded-full shrink-0 flex items-center justify-center transition-colors ${circleClass}">${svg}</div>
                         <div class="flex-1"><span class="inline-block px-2 py-0.5 bg-gray-800 text-gray-300 text-[9px] rounded-full font-bold uppercase tracking-wider mb-1.5">${h.tag}</span><div class="font-bold text-sm text-white">${h.name}</div></div>
                         <div class="text-blue-400 font-bold text-xs">+${h.xp} XP</div>
@@ -249,7 +256,8 @@
         async function saveHabitsToServer(btn) {
             btn.classList.add('btn-loading'); btn.textContent = "Сохранение...";
             try {
-                const r = await fetch(`${backendUrl}/update_habits/${userId}`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({habits: JSON.stringify(currentHabits)}) });
+                // ДОБАВЛЕНЫ ЗАГОЛОВКИ С ПОДПИСЬЮ!
+                const r = await fetch(`${backendUrl}/update_habits/${userId}`, { method: 'POST', headers: reqHeaders, body: JSON.stringify({habits: JSON.stringify(currentHabits)}) });
                 if(r.ok) { closeEditor(); tg.showAlert("Привычки успешно обновлены!"); updateUI(await r.json()); }
             } catch(e) { tg.showAlert("Ошибка сети"); } finally { btn.classList.remove('btn-loading'); btn.textContent = "Сохранить для моего профиля"; }
         }
@@ -279,7 +287,7 @@
             if (w > 0) {
                 localStorage.setItem('rpg_weight', w); if (h > 0) localStorage.setItem('rpg_height', h); localStorage.setItem('rpg_activity', a); loadCalcDefaults();
                 const glasses = Math.ceil((w * a) / 250); btn.classList.add('btn-loading');
-                try { const r = await fetch(`${backendUrl}/set_water_goal/${userId}?goal=${glasses}`, {method:'POST'}); if (r.ok) { tg.showAlert(`Биометрия сохранена.\nЦель: ${glasses} ст.`); updateUI(await r.json()); showTab('tasks'); } } finally { btn.classList.remove('btn-loading'); }
+                try { const r = await fetch(`${backendUrl}/set_water_goal/${userId}?goal=${glasses}`, {method:'POST', headers: reqHeaders}); if (r.ok) { tg.showAlert(`Биометрия сохранена.\nЦель: ${glasses} ст.`); updateUI(await r.json()); showTab('tasks'); } } finally { btn.classList.remove('btn-loading'); }
             } else { tg.showAlert("Введите вес!"); }
         }
 
@@ -310,12 +318,19 @@
             document.getElementById('shop-items').innerHTML = rewards.map(r => `<div class="prosto-card p-4"><div class="flex items-center gap-4 mb-4"><div class="w-12 h-12 rounded-2xl bg-[#0c1017] border border-gray-800 flex items-center justify-center text-2xl shrink-0">${r.icon}</div><div class="flex-1"><div class="font-bold text-white text-sm">${r.name}</div><div class="text-blue-400 font-bold text-xs mt-0.5">${r.cost} XP / шт</div></div></div><div class="flex items-center gap-3"><div class="flex items-center bg-[#0c1017] border border-gray-800 rounded-xl p-1"><button onclick="changeQty('${r.id}', -1)" class="w-10 h-10 font-bold text-gray-400 hover:text-white transition-colors text-lg">-</button><span id="qty-${r.id}" class="w-8 text-center text-sm font-bold text-white">${shopState[r.id]}</span><button onclick="changeQty('${r.id}', 1)" class="w-10 h-10 font-bold text-gray-400 hover:text-white transition-colors text-lg">+</button></div><button id="buy-btn-${r.id}" onclick="buy('${r.id}')" class="flex-1 prosto-btn py-3.5 px-2 font-bold text-[11px] uppercase tracking-wider">Забрать за <span id="total-${r.id}">${r.cost * shopState[r.id]}</span></button></div></div>`).join('');
         }
 
-        async function toggleSleep() { const btn = document.getElementById('btn-sleep'); btn.classList.add('btn-loading'); if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy'); try { const tz = new Date().getTimezoneOffset(); const r = await fetch(`${backendUrl}/sleep_action/${userId}?tz=${tz}`, {method:'POST'}); const data = await r.json(); updateUI(data); if (data.sleep_report) tg.showAlert(data.sleep_report); } finally { btn.classList.remove('btn-loading'); } }
-        async function buy(id) { const r = rewards.find(i => i.id === id); const btn = document.getElementById(`buy-btn-${id}`); const qty = shopState[id]; btn.classList.add('btn-loading'); if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium'); try { const res = await fetch(`${backendUrl}/buy_reward/${userId}?cost=${r.cost}&name=${r.name}&qty=${qty}`, {method:'POST'}); const data = await res.json(); if (data.error) { if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error'); tg.showAlert(data.error); } else { if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success'); updateUI(data); shopState[id] = 1; renderShop(); } } catch (e) { tg.showAlert("Ошибка сети"); } finally { btn.classList.remove('btn-loading'); } }
+        // --- ВАЖНО: ВСЕ ЗАПРОСЫ ТЕПЕРЬ С ОТПРАВКОЙ ПОДПИСИ И БЕЗ ЧИТ-КОДОВ ---
+        async function toggleSleep() { const btn = document.getElementById('btn-sleep'); btn.classList.add('btn-loading'); if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy'); try { const tz = new Date().getTimezoneOffset(); const r = await fetch(`${backendUrl}/sleep_action/${userId}?tz=${tz}`, {method:'POST', headers: reqHeaders}); const data = await r.json(); updateUI(data); if (data.sleep_report) tg.showAlert(data.sleep_report); } finally { btn.classList.remove('btn-loading'); } }
+        
+        async function buy(id) { const btn = document.getElementById(`buy-btn-${id}`); const qty = shopState[id]; btn.classList.add('btn-loading'); if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium'); try { const res = await fetch(`${backendUrl}/buy_reward/${userId}?reward_id=${id}&qty=${qty}`, {method:'POST', headers: reqHeaders}); const data = await res.json(); if (data.error) { if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error'); tg.showAlert(data.error); } else { if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success'); updateUI(data); shopState[id] = 1; renderShop(); } } catch (e) { tg.showAlert("Ошибка сети"); } finally { btn.classList.remove('btn-loading'); } }
+        
         function changeQty(id, delta) { shopState[id] = Math.max(1, shopState[id] + delta); const r = rewards.find(i => i.id === id); document.getElementById(`qty-${id}`).textContent = shopState[id]; document.getElementById(`total-${id}`).textContent = r.cost * shopState[id]; if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); }
-        async function loadHero() { try { const r = await fetch(`${backendUrl}/get_hero/${userId}`); updateUI(await r.json()); } catch (e) {} }
-        async function addXP(amt, id, name, btn) { btn.classList.add('btn-loading'); if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium'); try { const r = await fetch(`${backendUrl}/add_xp/${userId}?amount=${amt}&task_id=${id}&task_name=${name}`, {method:'POST'}); updateUI(await r.json()); } finally { btn.classList.remove('btn-loading'); } }
-        async function drinkWater(btn) { btn.classList.add('btn-loading'); if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium'); try { const r = await fetch(`${backendUrl}/drink_water/${userId}`, {method:'POST'}); updateUI(await r.json()); } finally { btn.classList.remove('btn-loading'); } }
+        
+        async function loadHero() { try { const r = await fetch(`${backendUrl}/get_hero/${userId}`, {headers: reqHeaders}); updateUI(await r.json()); } catch (e) {} }
+        
+        // ЗДЕСЬ МЫ БОЛЬШЕ НЕ ПЕРЕДАЕМ ОЧКИ И ИМЯ НА СЕРВЕР, ТОЛЬКО ID ЗАДАЧИ
+        async function addXP(id, btn) { btn.classList.add('btn-loading'); if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium'); try { const r = await fetch(`${backendUrl}/add_xp/${userId}?task_id=${id}`, {method:'POST', headers: reqHeaders}); updateUI(await r.json()); } finally { btn.classList.remove('btn-loading'); } }
+        
+        async function drinkWater(btn) { btn.classList.add('btn-loading'); if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium'); try { const r = await fetch(`${backendUrl}/drink_water/${userId}`, {method:'POST', headers: reqHeaders}); updateUI(await r.json()); } finally { btn.classList.remove('btn-loading'); } }
 
         function showTab(name) {
             ['tasks', 'shop', 'history', 'calc'].forEach(t => { 
