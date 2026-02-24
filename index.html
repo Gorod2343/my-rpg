@@ -9,7 +9,10 @@
     <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .tab-active { color: #10b981; border-bottom: 3px solid #10b981; }
-        .done-task { opacity: 0.25; filter: grayscale(1); pointer-events: none; text-decoration: line-through; }
+        .done-task { opacity: 0.3; filter: grayscale(1); pointer-events: none; text-decoration: line-through; }
+        .btn-loading { opacity: 0.5; pointer-events: none; transform: scale(0.98); }
+        .sleep-active { animation: pulse 2s infinite; background: #3730a3 !important; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); } 100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); } }
     </style>
 </head>
 <body class="bg-gray-900 text-white font-sans p-4 pb-28">
@@ -29,20 +32,31 @@
     </div>
 
     <div id="tab-tasks">
-        <div class="bg-gray-800 rounded-[2rem] p-6 mb-6 border border-gray-700 shadow-xl text-center">
+        <div class="bg-gray-800 rounded-[2rem] p-6 mb-4 border border-gray-700 shadow-xl text-center">
             <p class="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-1">Валюта месяца</p>
             <h2 id="month-xp" class="text-6xl font-black text-emerald-400">0</h2>
         </div>
 
+        <div class="bg-gray-800 rounded-2xl p-4 mb-4 border border-gray-700 shadow-md">
+            <div class="flex justify-between items-center mb-3">
+                <span class="text-xs font-black text-indigo-400 tracking-widest uppercase">🛏️ БАЗА: СОН</span>
+                <span class="text-emerald-400 font-bold text-[10px]">до +50 XP</span>
+            </div>
+            <button id="btn-sleep" onclick="toggleSleep()" class="w-full bg-indigo-600 rounded-xl p-4 font-black text-sm uppercase shadow-lg active:scale-95 transition-all flex justify-center items-center gap-2">
+                Уснуть 🌙
+            </button>
+            <p id="sleep-status" class="text-[9px] text-gray-500 text-center mt-2 font-bold uppercase hidden">Сон записывается...</p>
+        </div>
+
         <div class="bg-gray-800 rounded-2xl p-4 mb-6 border border-gray-700 shadow-md">
             <div class="flex justify-between items-center mb-3">
-                <span class="text-xs font-black text-cyan-400 tracking-widest uppercase text-left">💧 ВОДА (ЦЕЛЬ ПЕРСОНАЛЬНА)</span>
+                <span class="text-xs font-black text-cyan-400 tracking-widest uppercase">💧 БАЗА: ВОДА</span>
                 <span class="text-emerald-400 font-bold text-xs">+5 XP</span>
             </div>
             <div class="flex items-center gap-4">
-                <button onclick="drinkWater()" class="bg-cyan-600 w-12 h-12 rounded-xl text-xl shadow-lg active:scale-90 transition-all">🥤</button>
+                <button id="btn-water" onclick="drinkWater(this)" class="bg-cyan-600 w-12 h-12 rounded-xl text-xl shadow-lg active:scale-90 transition-all">🥤</button>
                 <div class="flex-1">
-                    <div id="water-text" class="text-[10px] text-gray-500 font-bold mb-1 text-left">0 / 8</div>
+                    <div id="water-text" class="text-[10px] text-gray-400 font-bold mb-1 text-left">0 / 8</div>
                     <div class="w-full bg-gray-700 h-2 rounded-full overflow-hidden shadow-inner"><div id="water-progress" class="bg-cyan-400 h-full transition-all duration-300" style="width: 0%"></div></div>
                 </div>
             </div>
@@ -53,18 +67,23 @@
             <button onclick="toggleMenu('menu-family')" class="bg-gray-800 p-4 rounded-xl border border-gray-700 text-left active:scale-95 transition-all text-blue-400">👨‍👩‍👦 <span class="text-[10px] font-black uppercase ml-1">Семья</span></button>
         </div>
 
-        <div id="menu-sport" class="hidden space-y-2 mb-4 text-left">
+        <div id="menu-sport" class="menu-category hidden space-y-2 mb-4 text-left">
             <button onclick="addXP(150, 'task-run', 'Бег', this)" id="task-run" class="w-full p-4 bg-gray-800 rounded-xl border border-gray-700 flex justify-between items-center shadow-lg active:scale-[0.98]"><span class="font-bold text-sm">Бег</span><span class="text-emerald-400 font-black">+150 XP</span></button>
             <button onclick="addXP(200, 'task-strength', 'Силовая', this)" id="task-strength" class="w-full p-4 bg-gray-800 rounded-xl border border-gray-700 flex justify-between items-center shadow-lg active:scale-[0.98]"><span class="font-bold text-sm">Силовая</span><span class="text-emerald-400 font-black">+200 XP</span></button>
+            <button onclick="addXP(150, 'task-cardio', 'Кардио', this)" id="task-cardio" class="w-full p-4 bg-gray-800 rounded-xl border border-gray-700 flex justify-between items-center shadow-lg active:scale-[0.98]"><span class="font-bold text-sm">Кардио</span><span class="text-emerald-400 font-black">+150 XP</span></button>
+            <button onclick="addXP(200, 'task-hiit', 'ВИИТ', this)" id="task-hiit" class="w-full p-4 bg-gray-800 rounded-xl border border-gray-700 flex justify-between items-center shadow-lg active:scale-[0.98]"><span class="font-bold text-sm">ВИИТ</span><span class="text-emerald-400 font-black">+200 XP</span></button>
         </div>
 
-        <div id="menu-family" class="hidden space-y-2 mb-4 text-left">
+        <div id="menu-family" class="menu-category hidden space-y-2 mb-4 text-left">
             <button onclick="addXP(100, 'task-kids', 'С детьми', this)" id="task-kids" class="w-full p-4 bg-gray-800 rounded-xl border border-gray-700 flex justify-between items-center shadow-lg active:scale-[0.98]"><span class="font-bold text-sm">Витюша и Димуля</span><span class="text-emerald-400 font-black">+100 XP</span></button>
         </div>
     </div>
 
     <div id="tab-shop" class="hidden">
-        <h2 class="text-[10px] font-black text-gray-500 uppercase mb-4 tracking-widest text-center">Магазин наград 🛒</h2>
+        <div class="bg-gray-800 rounded-2xl p-4 mb-4 border border-gray-700 shadow-md text-center">
+            <p class="text-gray-500 text-[10px] uppercase font-black tracking-widest mb-1">Доступно для трат</p>
+            <h2 id="shop-balance" class="text-3xl font-black text-emerald-400">0 XP</h2>
+        </div>
         <div id="shop-items" class="space-y-4"></div>
     </div>
 
@@ -75,24 +94,28 @@
 
     <div id="tab-calc" class="hidden text-left">
         <h2 class="text-[10px] font-black text-gray-500 uppercase mb-4 tracking-widest text-center">Твоя норма воды 🧬</h2>
-        <div class="bg-gray-800 rounded-2xl p-6 border border-gray-700 shadow-xl space-y-6">
-            <div>
-                <label class="text-[10px] font-black text-gray-400 uppercase">Твой вес (кг)</label>
-                <input type="number" id="calc-weight" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-3 mt-1 text-emerald-400 font-bold focus:outline-none" placeholder="0">
+        <div class="bg-gray-800 rounded-2xl p-6 border border-gray-700 shadow-xl space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-[9px] font-black text-gray-400 uppercase">Рост (см)</label>
+                    <input type="number" id="calc-height" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-3 mt-1 text-white font-bold focus:border-emerald-500" placeholder="180">
+                </div>
+                <div>
+                    <label class="text-[9px] font-black text-gray-400 uppercase">Вес (кг)</label>
+                    <input type="number" id="calc-weight" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-3 mt-1 text-white font-bold focus:border-emerald-500" placeholder="80">
+                </div>
             </div>
             <div>
-                <label class="text-[10px] font-black text-gray-400 uppercase">Образ жизни</label>
+                <label class="text-[9px] font-black text-gray-400 uppercase">Образ жизни</label>
                 <select id="calc-activity" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-3 mt-1 text-xs text-white">
                     <option value="30">Низкая активность (30 мл/кг)</option>
-                    <option value="35" selected>Золотой стандарт (35 мл/кг)</option>
-                    <option value="40">Активный/Спорт (40 мл/кг)</option>
+                    <option value="35">Золотой стандарт (35 мл/кг)</option>
+                    <option value="40" selected>Спорт / Бег (40 мл/кг)</option>
                 </select>
             </div>
-            <button onclick="applyWaterGoal()" class="w-full bg-emerald-600 rounded-xl p-3 font-black text-[10px] uppercase shadow-lg active:scale-95">Применить цель</button>
+            <button id="btn-calc" onclick="applyWaterGoal(this)" class="w-full bg-emerald-600 rounded-xl p-3 font-black text-[10px] uppercase shadow-lg active:scale-95 mt-2">Применить норму</button>
+            <p id="bmi-res" class="text-[10px] text-center text-cyan-400 font-bold hidden mt-2"></p>
         </div>
-        <p class="text-[9px] text-gray-600 mt-4 leading-relaxed text-center">
-            * 1 стакан = 250 мл. Результат автоматически обновит твою цель на главном экране.
-        </p>
     </div>
 
     <div class="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 p-3 flex justify-around z-50 backdrop-blur-md overflow-x-auto">
@@ -107,75 +130,87 @@
         tg.expand();
         const backendUrl = "https://rpg-backend-yg16.onrender.com";
         const username = "Александр"; 
-        let currentWaterGoal = 8;
 
         const rewards = [{ id: 'baton', name: 'Батончик', cost: 100, icon: '🍫' }, { id: 'soda', name: 'Газировка', cost: 150, icon: '🥤' }, { id: 'fast', name: 'Фаст Фуд', cost: 600, icon: '🍔' }];
         let shopState = {}; rewards.forEach(r => shopState[r.id] = 1);
 
-        async function applyWaterGoal() {
+        // Анти-зависание: обновляем при разблокировке экрана
+        window.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') loadHero(); });
+
+        // Умное меню категорий (гармошка)
+        function toggleMenu(id) { 
+            document.querySelectorAll('.menu-category').forEach(el => { if (el.id !== id) el.classList.add('hidden'); });
+            document.getElementById(id).classList.toggle('hidden'); 
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); 
+        }
+
+        async function applyWaterGoal(btn) {
             const w = parseFloat(document.getElementById('calc-weight').value);
+            const h = parseFloat(document.getElementById('calc-height').value);
             const a = parseFloat(document.getElementById('calc-activity').value);
+            
             if (w > 0) {
-                const ml = w * a;
-                const glasses = Math.ceil(ml / 250);
-                const r = await fetch(`${backendUrl}/set_water_goal/${username}?goal=${glasses}`, {method:'POST'});
-                if (r.ok) {
-                    tg.showAlert(`Цель обновлена: ${ml} мл (${glasses} стаканов)`);
-                    loadHero();
-                    showTab('tasks');
+                if (h > 0) {
+                    const bmi = (w / Math.pow(h / 100, 2)).toFixed(1);
+                    document.getElementById('bmi-res').classList.remove('hidden');
+                    document.getElementById('bmi-res').textContent = `Твой Индекс Массы Тела: ${bmi}`;
                 }
-            }
+                
+                const glasses = Math.ceil((w * a) / 250);
+                btn.classList.add('btn-loading');
+                try {
+                    const r = await fetch(`${backendUrl}/set_water_goal/${username}?goal=${glasses}`, {method:'POST'});
+                    if (r.ok) {
+                        tg.showAlert(`Новая цель: ${glasses} стаканов!`);
+                        updateUI(await r.json());
+                        showTab('tasks');
+                    }
+                } finally { btn.classList.remove('btn-loading'); }
+            } else { tg.showAlert("Введите вес!"); }
         }
 
         function updateUI(data) {
+            // Баланс
             document.getElementById('total-xp').textContent = data.total_xp;
             document.getElementById('month-xp').textContent = data.current_month_xp;
+            document.getElementById('shop-balance').textContent = data.current_month_xp + " XP";
+            
+            // Здоровье
             document.getElementById('user-hp').textContent = data.hp;
             document.getElementById('hp-bar').style.width = data.hp + '%';
-            currentWaterGoal = data.water_goal;
+            
+            // Вода
             document.getElementById('water-text').textContent = `${data.water_count} / ${data.water_goal}`;
-            document.getElementById('water-progress').style.width = (data.water_count / data.water_goal * 100) + '%';
+            document.getElementById('water-progress').style.width = Math.min((data.water_count / data.water_goal * 100), 100) + '%';
+            
+            // Сон
+            const sleepBtn = document.getElementById('btn-sleep');
+            const sleepStatus = document.getElementById('sleep-status');
+            if (data.sleep_start) {
+                const date = new Date(data.sleep_start);
+                sleepBtn.innerHTML = 'Проснуться ☀️';
+                sleepBtn.className = "w-full rounded-xl p-4 font-black text-sm uppercase shadow-lg active:scale-95 transition-all flex justify-center items-center gap-2 sleep-active";
+                sleepStatus.classList.remove('hidden');
+                sleepStatus.textContent = `Сон запущен в ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+            } else {
+                sleepBtn.innerHTML = 'Уснуть 🌙';
+                sleepBtn.className = "w-full bg-indigo-600 hover:bg-indigo-500 rounded-xl p-4 font-black text-sm uppercase shadow-lg active:scale-95 transition-all flex justify-center items-center gap-2";
+                sleepStatus.classList.add('hidden');
+            }
+
+            // История
             document.getElementById('history-list').innerHTML = data.history.map(h => `<div class="bg-gray-800/50 p-3 rounded-xl border border-gray-800 flex justify-between items-center"><div class="text-[11px] font-bold text-gray-200 text-left">${h.desc} <span class="text-[8px] text-gray-600 ml-1 font-mono uppercase">${h.time}</span></div><div class="font-black text-xs ${h.type === 'gain' ? 'text-emerald-400' : 'text-red-500'}">${h.type === 'gain' ? '+' : '-'}${h.amt}</div></div>`).join('');
+            
+            // Дела
             const done = data.completed_tasks.split(',');
             document.querySelectorAll('[id^="task-"]').forEach(btn => { const isDone = done.includes(btn.id); if (isDone) btn.classList.add('done-task'); else btn.classList.remove('done-task'); btn.disabled = isDone; });
         }
 
         function renderShop() {
             document.getElementById('shop-items').innerHTML = rewards.map(r => `
-                <div class="bg-gray-800 rounded-2xl p-4 border border-gray-700">
-                    <div class="flex justify-between mb-3 text-left"><div class="flex items-center gap-3 text-left"><span class="text-2xl">${r.icon}</span><span class="font-bold text-sm">${r.name}</span></div><div class="text-amber-400 font-black text-xs text-right">${r.cost} XP</div></div>
+                <div class="bg-gray-800 rounded-2xl p-4 border border-gray-700 shadow-md">
+                    <div class="flex justify-between mb-3 text-left"><div class="flex items-center gap-3"><span class="text-2xl">${r.icon}</span><span class="font-bold text-sm text-white">${r.name}</span></div><div class="text-amber-400 font-black text-xs mt-1">${r.cost} XP / шт</div></div>
                     <div class="flex items-center gap-2">
-                        <div class="flex items-center bg-gray-900 rounded-lg p-1 border border-gray-700">
-                            <button onclick="changeQty('${r.id}', -1)" class="w-10 h-10 font-bold text-gray-500">-</button>
-                            <span id="qty-${r.id}" class="w-8 text-center text-xs font-black">${shopState[r.id]}</span>
-                            <button onclick="changeQty('${r.id}', 1)" class="w-10 h-10 font-bold text-gray-500">+</button>
-                        </div>
-                        <button id="buy-btn-${r.id}" onclick="buy('${r.id}')" class="flex-1 bg-emerald-600 rounded-lg p-2 font-black text-[10px] uppercase">Купить: <span id="total-${r.id}">${r.cost * shopState[r.id]}</span> XP</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        async function buy(id) {
-            const r = rewards.find(i => i.id === id);
-            const qty = shopState[id];
-            const res = await fetch(`${backendUrl}/buy_reward/${username}?cost=${r.cost}&name=${r.name}&qty=${qty}`, {method:'POST'});
-            const data = await res.json();
-            if (data.error) tg.showAlert(data.error); else { updateUI(data); shopState[id] = 1; renderShop(); }
-        }
-
-        function changeQty(id, delta) { shopState[id] = Math.max(1, shopState[id] + delta); const r = rewards.find(i => i.id === id); document.getElementById(`qty-${id}`).textContent = shopState[id]; document.getElementById(`total-${id}`).textContent = r.cost * shopState[id]; }
-        async function loadHero() { try { const r = await fetch(`${backendUrl}/get_hero/${username}`); updateUI(await r.json()); } catch (e) { console.error(e); } }
-        async function addXP(amt, id, name, btn) { btn.disabled = true; const r = await fetch(`${backendUrl}/add_xp/${username}?amount=${amt}&task_id=${id}&task_name=${name}`, {method:'POST'}); updateUI(await r.json()); }
-        async function drinkWater() { const r = await fetch(`${backendUrl}/drink_water/${username}`, {method:'POST'}); updateUI(await r.json()); }
-
-        function showTab(name) {
-            ['tasks', 'shop', 'history', 'calc'].forEach(t => { document.getElementById('tab-'+t).classList.toggle('hidden', t !== name); document.getElementById('nav-'+t).classList.toggle('tab-active', t === name); document.getElementById('nav-'+t).classList.toggle('text-gray-500', t !== name); });
-            if (name === 'shop') renderShop();
-        }
-
-        function toggleMenu(id) { document.getElementById(id).classList.toggle('hidden'); }
-        loadHero();
-    </script>
-</body>
-</html>
+                        <div class="flex items-center bg-gray-900 rounded-lg p-1 border border-gray-700 shadow-inner">
+                            <button onclick="changeQty('${r.id}', -1)" class="w-10 h-10 font-bold text-gray-500 hover:text-white">-</button>
+                            <span id="qty-${r.id}" class="w-6 text-center text-xs font-black text-white">${shopState[r.id]}</span>
