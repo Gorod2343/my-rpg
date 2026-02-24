@@ -12,7 +12,6 @@
         .prosto-card { background-color: #161b22; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1.5rem; }
         .prosto-btn { background-color: #2563eb; color: white; border-radius: 1rem; transition: all 0.2s ease; }
         .prosto-btn:active { transform: scale(0.97); background-color: #1d4ed8; }
-        .prosto-btn-outline { background-color: transparent; border: 1px solid #2563eb; color: #3b82f6; border-radius: 1rem; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .nav-active { color: #3b82f6; }
         .btn-loading { opacity: 0.6; pointer-events: none; transform: scale(0.98); }
@@ -28,7 +27,6 @@
         .chevron { transition: transform 0.3s ease; }
         .rotate-180 { transform: rotate(180deg); }
         
-        /* Модальное окно редактора */
         #editor-modal { transition: opacity 0.3s, transform 0.3s; opacity: 0; pointer-events: none; transform: translateY(20px); }
         #editor-modal.active { opacity: 1; pointer-events: auto; transform: translateY(0); }
     </style>
@@ -44,7 +42,7 @@
 
     <div class="flex justify-between items-center mb-8 pt-2">
         <div class="flex items-center gap-3">
-            <div id="avatar-container" onclick="manualSync()" class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xl cursor-pointer shadow-[0_0_15px_rgba(37,99,235,0.3)]">А</div>
+            <div id="avatar-container" onclick="manualSync()" class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xl cursor-pointer shadow-[0_0_15px_rgba(37,99,235,0.3)]"></div>
             <div>
                 <h1 id="user-name" class="text-lg font-bold leading-tight">Загрузка...</h1>
                 <p class="text-xs text-gray-400 mt-0.5">Всего очков: <span id="total-xp" class="text-white font-semibold">0</span></p>
@@ -170,115 +168,53 @@
         <div id="editor-list" class="space-y-2">
             </div>
         
-        <button onclick="saveHabitsToServer(this)" id="btn-save-habits" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl p-4 font-bold text-sm mt-8 shadow-lg transition-all active:scale-95">Сохранить изменения</button>
+        <button onclick="saveHabitsToServer(this)" id="btn-save-habits" class="w-full bg-blue-600 hover:bg-blue-500 text-white rounded-xl p-4 font-bold text-sm mt-8 shadow-lg transition-all active:scale-95">Сохранить для моего профиля</button>
     </div>
 
-    <div id="tab-shop" class="hidden space-y-6">
-        <div class="text-center mb-6 mt-4">
-            <h2 class="text-2xl font-bold mb-2">Награды за труд</h2>
-            <p class="text-xs text-gray-400">Потратьте заработанные очки.</p>
-        </div>
-        <div class="prosto-card p-6 text-center mb-6 shadow-[0_0_20px_rgba(37,99,235,0.1)]">
-            <p class="text-gray-400 text-[10px] uppercase font-bold tracking-widest mb-1">Доступный баланс</p>
-            <h2 id="shop-balance" class="text-4xl font-extrabold text-blue-500">0 XP</h2>
-        </div>
-        <div id="shop-items" class="space-y-3"></div>
-    </div>
-
-    <div id="tab-history" class="hidden space-y-6">
-        <div class="text-center mb-6 mt-4">
-            <h2 class="text-2xl font-bold mb-2">История событий</h2>
-            <p class="text-xs text-gray-400">Ваш путь трансформации.</p>
-        </div>
-        <div id="history-list" class="space-y-3"></div>
-    </div>
-
-    <div id="tab-calc" class="hidden space-y-6">
-        <div class="text-center mb-6 mt-4">
-            <h2 class="text-2xl font-bold mb-2">Биометрия</h2>
-            <p class="text-xs text-gray-400">Настройка персональных параметров.</p>
-        </div>
-
-        <div class="prosto-card p-6 space-y-5">
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-2 block">Рост (см)</label>
-                    <input type="number" id="calc-height" class="w-full bg-[#0c1017] border border-gray-800 rounded-xl p-3 text-white font-bold focus:border-blue-500 outline-none transition-colors" placeholder="180">
-                </div>
-                <div>
-                    <label class="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-2 block">Вес (кг)</label>
-                    <input type="number" id="calc-weight" class="w-full bg-[#0c1017] border border-gray-800 rounded-xl p-3 text-white font-bold focus:border-blue-500 outline-none transition-colors" placeholder="80">
-                </div>
-            </div>
-            <div>
-                <label class="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-2 block">Уровень активности</label>
-                <select id="calc-activity" class="w-full bg-[#0c1017] border border-gray-800 rounded-xl p-3 text-sm text-white outline-none focus:border-blue-500 transition-colors">
-                    <option value="30">Низкая (30 мл/кг)</option>
-                    <option value="35">Средняя (35 мл/кг)</option>
-                    <option value="40" selected>Высокая / Бег (40 мл/кг)</option>
-                </select>
-            </div>
-            <div id="bmi-block" class="hidden bg-blue-900/20 border border-blue-800/50 p-4 rounded-xl mt-4">
-                <div class="text-[10px] text-blue-400 font-bold mb-1 uppercase tracking-wider">Анализ тела</div>
-                <div id="bmi-res" class="text-sm font-semibold text-white"></div>
-            </div>
-            <button id="btn-calc" onclick="applyWaterGoal(this)" class="w-full prosto-btn p-3.5 font-bold text-sm mt-4">
-                Рассчитать и применить
-            </button>
-        </div>
-    </div>
+    <div id="tab-shop" class="hidden space-y-6"><div class="text-center mb-6 mt-4"><h2 class="text-2xl font-bold mb-2">Награды за труд</h2><p class="text-xs text-gray-400">Потратьте заработанные очки.</p></div><div class="prosto-card p-6 text-center mb-6 shadow-[0_0_20px_rgba(37,99,235,0.1)]"><p class="text-gray-400 text-[10px] uppercase font-bold tracking-widest mb-1">Доступный баланс</p><h2 id="shop-balance" class="text-4xl font-extrabold text-blue-500">0 XP</h2></div><div id="shop-items" class="space-y-3"></div></div>
+    <div id="tab-history" class="hidden space-y-6"><div class="text-center mb-6 mt-4"><h2 class="text-2xl font-bold mb-2">История событий</h2><p class="text-xs text-gray-400">Ваш путь трансформации.</p></div><div id="history-list" class="space-y-3"></div></div>
+    <div id="tab-calc" class="hidden space-y-6"><div class="text-center mb-6 mt-4"><h2 class="text-2xl font-bold mb-2">Биометрия</h2><p class="text-xs text-gray-400">Настройка персональных параметров.</p></div><div class="prosto-card p-6 space-y-5"><div class="grid grid-cols-2 gap-4"><div><label class="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-2 block">Рост (см)</label><input type="number" id="calc-height" class="w-full bg-[#0c1017] border border-gray-800 rounded-xl p-3 text-white font-bold focus:border-blue-500 outline-none transition-colors" placeholder="180"></div><div><label class="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-2 block">Вес (кг)</label><input type="number" id="calc-weight" class="w-full bg-[#0c1017] border border-gray-800 rounded-xl p-3 text-white font-bold focus:border-blue-500 outline-none transition-colors" placeholder="80"></div></div><div><label class="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-2 block">Уровень активности</label><select id="calc-activity" class="w-full bg-[#0c1017] border border-gray-800 rounded-xl p-3 text-sm text-white outline-none focus:border-blue-500 transition-colors"><option value="30">Низкая (30 мл/кг)</option><option value="35">Средняя (35 мл/кг)</option><option value="40" selected>Высокая / Бег (40 мл/кг)</option></select></div><div id="bmi-block" class="hidden bg-blue-900/20 border border-blue-800/50 p-4 rounded-xl mt-4"><div class="text-[10px] text-blue-400 font-bold mb-1 uppercase tracking-wider">Анализ тела</div><div id="bmi-res" class="text-sm font-semibold text-white"></div></div><button id="btn-calc" onclick="applyWaterGoal(this)" class="w-full prosto-btn p-3.5 font-bold text-sm mt-4">Рассчитать и применить</button></div></div>
 
     <div class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md bg-[#161b22]/90 backdrop-blur-xl border border-gray-800 rounded-2xl p-1.5 flex justify-around shadow-[0_10px_40px_rgba(0,0,0,0.5)] z-50">
-        <button onclick="showTab('tasks')" id="nav-tasks" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl nav-active bg-white/5 transition-all">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            <span class="text-[9px] font-bold uppercase tracking-wider">Путь</span>
-        </button>
-        <button onclick="showTab('shop')" id="nav-shop" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl text-gray-500 transition-all">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-            <span class="text-[9px] font-bold uppercase tracking-wider">Магазин</span>
-        </button>
-        <button onclick="showTab('history')" id="nav-history" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl text-gray-500 transition-all">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            <span class="text-[9px] font-bold uppercase tracking-wider">Журнал</span>
-        </button>
-        <button onclick="showTab('calc')" id="nav-calc" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl text-gray-500 transition-all">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-            <span class="text-[9px] font-bold uppercase tracking-wider">Биометрия</span>
-        </button>
+        <button onclick="showTab('tasks')" id="nav-tasks" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl nav-active bg-white/5 transition-all"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span class="text-[9px] font-bold uppercase tracking-wider">Путь</span></button>
+        <button onclick="showTab('shop')" id="nav-shop" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl text-gray-500 transition-all"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg><span class="text-[9px] font-bold uppercase tracking-wider">Магазин</span></button>
+        <button onclick="showTab('history')" id="nav-history" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl text-gray-500 transition-all"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span class="text-[9px] font-bold uppercase tracking-wider">Журнал</span></button>
+        <button onclick="showTab('calc')" id="nav-calc" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl text-gray-500 transition-all"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg><span class="text-[9px] font-bold uppercase tracking-wider">Биометрия</span></button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
         const backendUrl = "https://rpg-backend-yg16.onrender.com";
-        let username = "Александр";
-        if(tg.initDataUnsafe?.user?.first_name) {
-            username = tg.initDataUnsafe.user.first_name;
-            document.getElementById('avatar-container').textContent = username[0];
+        
+        // --- СИСТЕМА ИДЕНТИФИКАЦИИ (SaaS) ---
+        // Теперь мы используем уникальный ID телеграма, а не просто Имя.
+        let userId = "guest_123";
+        let firstName = "Гость";
+        
+        if(tg.initDataUnsafe?.user) {
+            userId = tg.initDataUnsafe.user.id.toString();
+            firstName = tg.initDataUnsafe.user.first_name;
+            document.getElementById('avatar-container').textContent = firstName[0];
         }
-        document.getElementById('user-name').textContent = username;
+        document.getElementById('user-name').textContent = firstName;
 
         const rewards = [{ id: 'baton', name: 'Батончик', cost: 100, icon: '🍫' }, { id: 'soda', name: 'Газировка', cost: 150, icon: '🥤' }, { id: 'fast', name: 'Фаст Фуд', cost: 600, icon: '🍔' }];
         let shopState = {}; rewards.forEach(r => shopState[r.id] = 1);
 
-        // БАЗОВЫЕ ПРИВЫЧКИ (Если человек новый, сервер отдаст пустую строку, и мы покажем это)
+        // УНИВЕРСАЛЬНЫЙ ШАБЛОН ДЛЯ ВСЕХ
         const defaultHabits = [
             { id: 'task-run', cat: 'sport', tag: 'Кардио', name: 'Пробежка', xp: 150 },
             { id: 'task-strength', cat: 'sport', tag: 'Сила', name: 'Силовая тренировка', xp: 200 },
             { id: 'task-cardio', cat: 'sport', tag: 'Выносливость', name: 'Кардио сессия', xp: 150 },
             { id: 'task-hiit', cat: 'sport', tag: 'Интенсив', name: 'ВИИТ', xp: 200 },
-            { id: 'task-kids', cat: 'family', tag: 'Связь', name: 'Витюша и Димуля', xp: 100 }
+            { id: 'task-family-time', cat: 'family', tag: 'Связь', name: 'Время с семьей', xp: 100 }
         ];
-        
         let currentHabits = [];
         let completedTasksArray = [];
 
-        // ГЕНЕРАЦИЯ HTML КНОПОК ПРИВЫЧЕК
         function renderHabits() {
-            const listSport = document.getElementById('list-sport');
-            const listFamily = document.getElementById('list-family');
-            const editorList = document.getElementById('editor-list');
-            
+            const listSport = document.getElementById('list-sport'); const listFamily = document.getElementById('list-family'); const editorList = document.getElementById('editor-list');
             listSport.innerHTML = ''; listFamily.innerHTML = ''; editorList.innerHTML = '';
 
             currentHabits.forEach(h => {
@@ -290,86 +226,37 @@
                 const html = `
                     <button onclick="addXP(${h.xp}, '${h.id}', '${h.name}', this)" id="${h.id}" class="w-full text-left flex items-start gap-4 p-4 hover:bg-white/5 rounded-xl transition-colors ${doneClass}" ${isDone ? 'disabled' : ''}>
                         <div class="status-circle mt-1 w-5 h-5 rounded-full shrink-0 flex items-center justify-center transition-colors ${circleClass}">${svg}</div>
-                        <div class="flex-1">
-                            <span class="inline-block px-2 py-0.5 bg-gray-800 text-gray-300 text-[9px] rounded-full font-bold uppercase tracking-wider mb-1.5">${h.tag}</span>
-                            <div class="font-bold text-sm text-white">${h.name}</div>
-                        </div>
+                        <div class="flex-1"><span class="inline-block px-2 py-0.5 bg-gray-800 text-gray-300 text-[9px] rounded-full font-bold uppercase tracking-wider mb-1.5">${h.tag}</span><div class="font-bold text-sm text-white">${h.name}</div></div>
                         <div class="text-blue-400 font-bold text-xs">+${h.xp} XP</div>
-                    </button>
-                `;
+                    </button>`;
                 
-                if (h.cat === 'sport') listSport.innerHTML += html;
-                else listFamily.innerHTML += html;
-
-                // Для редактора
-                editorList.innerHTML += `
-                    <div class="bg-[#161b22] border border-gray-800 p-3 rounded-xl flex justify-between items-center">
-                        <div>
-                            <span class="text-[9px] text-gray-500 uppercase font-bold">${h.cat === 'sport' ? 'Спорт' : 'Семья'}</span>
-                            <div class="font-bold text-sm text-white">${h.name} <span class="text-blue-400 text-xs ml-1">+${h.xp}</span></div>
-                        </div>
-                        <button onclick="removeHabit('${h.id}')" class="w-8 h-8 rounded-lg bg-red-500/20 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors">✕</button>
-                    </div>
-                `;
+                if (h.cat === 'sport') listSport.innerHTML += html; else listFamily.innerHTML += html;
+                editorList.innerHTML += `<div class="bg-[#161b22] border border-gray-800 p-3 rounded-xl flex justify-between items-center"><div><span class="text-[9px] text-gray-500 uppercase font-bold">${h.cat === 'sport' ? 'Спорт' : 'Семья'}</span><div class="font-bold text-sm text-white">${h.name} <span class="text-blue-400 text-xs ml-1">+${h.xp}</span></div></div><button onclick="removeHabit('${h.id}')" class="w-8 h-8 rounded-lg bg-red-500/20 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors">✕</button></div>`;
             });
         }
 
-        // РЕДАКТОР ПРИВЫЧЕК
         function openEditor() { document.getElementById('editor-modal').classList.add('active'); if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); }
         function closeEditor() { document.getElementById('editor-modal').classList.remove('active'); }
-
         function addNewHabit() {
-            const name = document.getElementById('new-h-name').value.trim();
-            const tag = document.getElementById('new-h-tag').value.trim();
-            const cat = document.getElementById('new-h-cat').value;
-            const xp = parseInt(document.getElementById('new-h-xp').value);
-
-            if(!name || !tag || !xp || isNaN(xp)) {
-                tg.showAlert("Заполните все поля корректно!"); return;
-            }
-
-            const newId = 'task-custom-' + Date.now();
-            currentHabits.push({ id: newId, cat: cat, tag: tag, name: name, xp: xp });
-            
-            document.getElementById('new-h-name').value = '';
-            document.getElementById('new-h-tag').value = '';
-            document.getElementById('new-h-xp').value = '';
-            
-            renderHabits();
-            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            const name = document.getElementById('new-h-name').value.trim(); const tag = document.getElementById('new-h-tag').value.trim(); const cat = document.getElementById('new-h-cat').value; const xp = parseInt(document.getElementById('new-h-xp').value);
+            if(!name || !tag || !xp || isNaN(xp)) { tg.showAlert("Заполните все поля!"); return; }
+            currentHabits.push({ id: 'task-custom-' + Date.now(), cat: cat, tag: tag, name: name, xp: xp });
+            document.getElementById('new-h-name').value = ''; document.getElementById('new-h-tag').value = ''; document.getElementById('new-h-xp').value = '';
+            renderHabits(); if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
         }
-
-        function removeHabit(id) {
-            currentHabits = currentHabits.filter(h => h.id !== id);
-            renderHabits();
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-        }
+        function removeHabit(id) { currentHabits = currentHabits.filter(h => h.id !== id); renderHabits(); if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); }
 
         async function saveHabitsToServer(btn) {
-            btn.classList.add('btn-loading');
-            btn.textContent = "Сохранение...";
+            btn.classList.add('btn-loading'); btn.textContent = "Сохранение...";
             try {
-                const jsonStr = JSON.stringify(currentHabits);
-                const r = await fetch(`${backendUrl}/update_habits/${username}`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({habits: jsonStr})
-                });
-                if(r.ok) {
-                    closeEditor();
-                    tg.showAlert("Привычки успешно обновлены!");
-                    updateUI(await r.json());
-                }
-            } catch(e) { tg.showAlert("Ошибка сети"); }
-            finally { btn.classList.remove('btn-loading'); btn.textContent = "Сохранить изменения"; }
+                const r = await fetch(`${backendUrl}/update_habits/${userId}`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({habits: JSON.stringify(currentHabits)}) });
+                if(r.ok) { closeEditor(); tg.showAlert("Привычки успешно обновлены!"); updateUI(await r.json()); }
+            } catch(e) { tg.showAlert("Ошибка сети"); } finally { btn.classList.remove('btn-loading'); btn.textContent = "Сохранить для моего профиля"; }
         }
 
-        // ОСТАЛЬНАЯ ЛОГИКА
         function toggleAccordion(contentId, iconId) {
-            const content = document.getElementById(contentId); const icon = document.getElementById(iconId);
-            const isClosing = content.style.maxHeight && content.style.maxHeight !== '0px';
-            document.querySelectorAll('.accordion-content').forEach(el => { el.style.maxHeight = '0px'; });
-            document.querySelectorAll('.chevron').forEach(el => { el.classList.remove('rotate-180'); });
+            const content = document.getElementById(contentId); const icon = document.getElementById(iconId); const isClosing = content.style.maxHeight && content.style.maxHeight !== '0px';
+            document.querySelectorAll('.accordion-content').forEach(el => { el.style.maxHeight = '0px'; }); document.querySelectorAll('.chevron').forEach(el => { el.classList.remove('rotate-180'); });
             if (!isClosing) { content.style.maxHeight = content.scrollHeight + 'px'; icon.classList.add('rotate-180'); }
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
         }
@@ -379,8 +266,7 @@
             if (w) document.getElementById('calc-weight').value = w; if (h) document.getElementById('calc-height').value = h; if (a) document.getElementById('calc-activity').value = a;
             if (w && h) {
                 const bmi = (w / Math.pow(h / 100, 2)).toFixed(1);
-                let text = `ИМТ: ${bmi}. `;
-                if(bmi < 18.5) text += "Дефицит массы."; else if(bmi < 25) text += "Норма. Отличный результат!"; else text += "Избыточная масса.";
+                let text = `ИМТ: ${bmi}. `; if(bmi < 18.5) text += "Дефицит массы."; else if(bmi < 25) text += "Норма."; else text += "Избыточная масса.";
                 document.getElementById('bmi-block').classList.remove('hidden'); document.getElementById('bmi-res').textContent = text;
             }
         }
@@ -389,58 +275,31 @@
         function manualSync() { if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); loadHero(); }
 
         async function applyWaterGoal(btn) {
-            const w = parseFloat(document.getElementById('calc-weight').value);
-            const h = parseFloat(document.getElementById('calc-height').value);
-            const a = parseFloat(document.getElementById('calc-activity').value);
+            const w = parseFloat(document.getElementById('calc-weight').value); const h = parseFloat(document.getElementById('calc-height').value); const a = parseFloat(document.getElementById('calc-activity').value);
             if (w > 0) {
-                localStorage.setItem('rpg_weight', w); if (h > 0) localStorage.setItem('rpg_height', h); localStorage.setItem('rpg_activity', a);
-                loadCalcDefaults();
+                localStorage.setItem('rpg_weight', w); if (h > 0) localStorage.setItem('rpg_height', h); localStorage.setItem('rpg_activity', a); loadCalcDefaults();
                 const glasses = Math.ceil((w * a) / 250); btn.classList.add('btn-loading');
-                try { const r = await fetch(`${backendUrl}/set_water_goal/${username}?goal=${glasses}`, {method:'POST'}); if (r.ok) { tg.showAlert(`Биометрия сохранена.\nЦель: ${glasses} ст.`); updateUI(await r.json()); showTab('tasks'); }
-                } finally { btn.classList.remove('btn-loading'); }
+                try { const r = await fetch(`${backendUrl}/set_water_goal/${userId}?goal=${glasses}`, {method:'POST'}); if (r.ok) { tg.showAlert(`Биометрия сохранена.\nЦель: ${glasses} ст.`); updateUI(await r.json()); showTab('tasks'); } } finally { btn.classList.remove('btn-loading'); }
             } else { tg.showAlert("Введите вес!"); }
         }
 
         function updateUI(data) {
-            document.getElementById('total-xp').textContent = data.total_xp;
-            document.getElementById('month-xp').textContent = data.current_month_xp;
-            document.getElementById('shop-balance').textContent = data.current_month_xp + " XP"; 
-            document.getElementById('user-hp').textContent = data.hp;
-            document.getElementById('hp-bar').style.width = data.hp + '%';
-            document.getElementById('water-text').textContent = `${data.water_count} / ${data.water_goal} ст.`;
-            document.getElementById('water-progress').style.width = Math.min((data.water_count / data.water_goal * 100), 100) + '%';
+            document.getElementById('total-xp').textContent = data.total_xp; document.getElementById('month-xp').textContent = data.current_month_xp; document.getElementById('shop-balance').textContent = data.current_month_xp + " XP"; document.getElementById('user-hp').textContent = data.hp; document.getElementById('hp-bar').style.width = data.hp + '%'; document.getElementById('water-text').textContent = `${data.water_count} / ${data.water_goal} ст.`; document.getElementById('water-progress').style.width = Math.min((data.water_count / data.water_goal * 100), 100) + '%';
             
-            const sleepBtn = document.getElementById('btn-sleep');
-            const sleepStatus = document.getElementById('sleep-status');
+            const sleepBtn = document.getElementById('btn-sleep'); const sleepStatus = document.getElementById('sleep-status');
             if (data.sleep_start) {
-                let safeTimeStr = data.sleep_start;
-                if (!safeTimeStr.includes('Z') && !safeTimeStr.includes('+')) safeTimeStr += 'Z';
-                const date = new Date(safeTimeStr); 
-                sleepBtn.innerHTML = 'Проснуться ☀️';
-                sleepBtn.className = "w-full prosto-btn p-3.5 font-bold text-sm flex justify-center items-center gap-2 sleep-active";
-                sleepStatus.classList.remove('hidden');
-                sleepStatus.textContent = `Сон идет с ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-            } else {
-                sleepBtn.innerHTML = 'Начать трекинг сна 🌙';
-                sleepBtn.className = "w-full prosto-btn p-3.5 font-bold text-sm flex justify-center items-center gap-2";
-                sleepStatus.classList.add('hidden');
-            }
+                let safeTimeStr = data.sleep_start; if (!safeTimeStr.includes('Z') && !safeTimeStr.includes('+')) safeTimeStr += 'Z'; const date = new Date(safeTimeStr); 
+                sleepBtn.innerHTML = 'Проснуться ☀️'; sleepBtn.className = "w-full prosto-btn p-3.5 font-bold text-sm flex justify-center items-center gap-2 sleep-active"; sleepStatus.classList.remove('hidden'); sleepStatus.textContent = `Сон идет с ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+            } else { sleepBtn.innerHTML = 'Начать трекинг сна 🌙'; sleepBtn.className = "w-full prosto-btn p-3.5 font-bold text-sm flex justify-center items-center gap-2"; sleepStatus.classList.add('hidden'); }
 
             document.getElementById('history-list').innerHTML = data.history.map(h => {
-                let hTimeStr = h.time;
-                if (!hTimeStr.includes('Z') && !hTimeStr.includes('+') && hTimeStr.includes('T')) hTimeStr += 'Z';
-                let displayTime = hTimeStr;
+                let hTimeStr = h.time; if (!hTimeStr.includes('Z') && !hTimeStr.includes('+') && hTimeStr.includes('T')) hTimeStr += 'Z'; let displayTime = hTimeStr;
                 try { const hd = new Date(hTimeStr); if (!isNaN(hd)) displayTime = `${String(hd.getHours()).padStart(2,'0')}:${String(hd.getMinutes()).padStart(2,'0')}`; } catch(e){}
                 return `<div class="prosto-card p-4 flex justify-between items-center mb-2"><div class="flex-1 pr-4"><div class="text-sm font-bold text-white mb-1 leading-tight">${h.desc}</div><div class="text-[10px] text-gray-500 uppercase tracking-wider">${displayTime}</div></div><div class="font-bold text-base whitespace-nowrap ${h.type === 'gain' ? 'text-blue-400' : 'text-red-400'}">${h.type === 'gain' ? '+' : '-'}${h.amt} XP</div></div>`;
             }).join('');
             
-            // ДИНАМИЧЕСКИЕ ПРИВЫЧКИ
             completedTasksArray = data.completed_tasks ? data.completed_tasks.split(',') : [];
-            if (data.custom_habits && data.custom_habits.length > 5) {
-                currentHabits = JSON.parse(data.custom_habits);
-            } else {
-                currentHabits = JSON.parse(JSON.stringify(defaultHabits));
-            }
+            if (data.custom_habits && data.custom_habits.length > 5) { currentHabits = JSON.parse(data.custom_habits); } else { currentHabits = JSON.parse(JSON.stringify(defaultHabits)); }
             renderHabits();
 
             const splash = document.getElementById('splash-screen');
@@ -448,38 +307,15 @@
         }
 
         function renderShop() {
-            document.getElementById('shop-items').innerHTML = rewards.map(r => `
-                <div class="prosto-card p-4">
-                    <div class="flex items-center gap-4 mb-4"><div class="w-12 h-12 rounded-2xl bg-[#0c1017] border border-gray-800 flex items-center justify-center text-2xl shrink-0">${r.icon}</div><div class="flex-1"><div class="font-bold text-white text-sm">${r.name}</div><div class="text-blue-400 font-bold text-xs mt-0.5">${r.cost} XP / шт</div></div></div>
-                    <div class="flex items-center gap-3">
-                        <div class="flex items-center bg-[#0c1017] border border-gray-800 rounded-xl p-1">
-                            <button onclick="changeQty('${r.id}', -1)" class="w-10 h-10 font-bold text-gray-400 hover:text-white transition-colors text-lg">-</button>
-                            <span id="qty-${r.id}" class="w-8 text-center text-sm font-bold text-white">${shopState[r.id]}</span>
-                            <button onclick="changeQty('${r.id}', 1)" class="w-10 h-10 font-bold text-gray-400 hover:text-white transition-colors text-lg">+</button>
-                        </div>
-                        <button id="buy-btn-${r.id}" onclick="buy('${r.id}')" class="flex-1 prosto-btn py-3.5 px-2 font-bold text-[11px] uppercase tracking-wider">Забрать за <span id="total-${r.id}">${r.cost * shopState[r.id]}</span></button>
-                    </div>
-                </div>
-            `).join('');
+            document.getElementById('shop-items').innerHTML = rewards.map(r => `<div class="prosto-card p-4"><div class="flex items-center gap-4 mb-4"><div class="w-12 h-12 rounded-2xl bg-[#0c1017] border border-gray-800 flex items-center justify-center text-2xl shrink-0">${r.icon}</div><div class="flex-1"><div class="font-bold text-white text-sm">${r.name}</div><div class="text-blue-400 font-bold text-xs mt-0.5">${r.cost} XP / шт</div></div></div><div class="flex items-center gap-3"><div class="flex items-center bg-[#0c1017] border border-gray-800 rounded-xl p-1"><button onclick="changeQty('${r.id}', -1)" class="w-10 h-10 font-bold text-gray-400 hover:text-white transition-colors text-lg">-</button><span id="qty-${r.id}" class="w-8 text-center text-sm font-bold text-white">${shopState[r.id]}</span><button onclick="changeQty('${r.id}', 1)" class="w-10 h-10 font-bold text-gray-400 hover:text-white transition-colors text-lg">+</button></div><button id="buy-btn-${r.id}" onclick="buy('${r.id}')" class="flex-1 prosto-btn py-3.5 px-2 font-bold text-[11px] uppercase tracking-wider">Забрать за <span id="total-${r.id}">${r.cost * shopState[r.id]}</span></button></div></div>`).join('');
         }
 
-        async function toggleSleep() { const btn = document.getElementById('btn-sleep'); btn.classList.add('btn-loading'); if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy'); try { const tz = new Date().getTimezoneOffset(); const r = await fetch(`${backendUrl}/sleep_action/${username}?tz=${tz}`, {method:'POST'}); const data = await r.json(); updateUI(data); if (data.sleep_report) tg.showAlert(data.sleep_report); } finally { btn.classList.remove('btn-loading'); } }
-        async function buy(id) { const r = rewards.find(i => i.id === id); const btn = document.getElementById(`buy-btn-${id}`); const qty = shopState[id]; btn.classList.add('btn-loading'); if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium'); try { const res = await fetch(`${backendUrl}/buy_reward/${username}?cost=${r.cost}&name=${r.name}&qty=${qty}`, {method:'POST'}); const data = await res.json(); if (data.error) { if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error'); tg.showAlert(data.error); } else { if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success'); updateUI(data); shopState[id] = 1; renderShop(); } } catch (e) { tg.showAlert("Ошибка сети"); } finally { btn.classList.remove('btn-loading'); } }
+        async function toggleSleep() { const btn = document.getElementById('btn-sleep'); btn.classList.add('btn-loading'); if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy'); try { const tz = new Date().getTimezoneOffset(); const r = await fetch(`${backendUrl}/sleep_action/${userId}?tz=${tz}`, {method:'POST'}); const data = await r.json(); updateUI(data); if (data.sleep_report) tg.showAlert(data.sleep_report); } finally { btn.classList.remove('btn-loading'); } }
+        async function buy(id) { const r = rewards.find(i => i.id === id); const btn = document.getElementById(`buy-btn-${id}`); const qty = shopState[id]; btn.classList.add('btn-loading'); if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium'); try { const res = await fetch(`${backendUrl}/buy_reward/${userId}?cost=${r.cost}&name=${r.name}&qty=${qty}`, {method:'POST'}); const data = await res.json(); if (data.error) { if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error'); tg.showAlert(data.error); } else { if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success'); updateUI(data); shopState[id] = 1; renderShop(); } } catch (e) { tg.showAlert("Ошибка сети"); } finally { btn.classList.remove('btn-loading'); } }
         function changeQty(id, delta) { shopState[id] = Math.max(1, shopState[id] + delta); const r = rewards.find(i => i.id === id); document.getElementById(`qty-${id}`).textContent = shopState[id]; document.getElementById(`total-${id}`).textContent = r.cost * shopState[id]; if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); }
-        async function loadHero() { try { const r = await fetch(`${backendUrl}/get_hero/${username}`); updateUI(await r.json()); } catch (e) {} }
-        
-        async function addXP(amt, id, name, btn) { 
-            btn.classList.add('btn-loading'); 
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium'); 
-            try { 
-                const r = await fetch(`${backendUrl}/add_xp/${username}?amount=${amt}&task_id=${id}&task_name=${name}`, {method:'POST'}); 
-                updateUI(await r.json()); 
-            } finally { 
-                btn.classList.remove('btn-loading'); 
-            } 
-        }
-        
-        async function drinkWater(btn) { btn.classList.add('btn-loading'); if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium'); try { const r = await fetch(`${backendUrl}/drink_water/${username}`, {method:'POST'}); updateUI(await r.json()); } finally { btn.classList.remove('btn-loading'); } }
+        async function loadHero() { try { const r = await fetch(`${backendUrl}/get_hero/${userId}`); updateUI(await r.json()); } catch (e) {} }
+        async function addXP(amt, id, name, btn) { btn.classList.add('btn-loading'); if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium'); try { const r = await fetch(`${backendUrl}/add_xp/${userId}?amount=${amt}&task_id=${id}&task_name=${name}`, {method:'POST'}); updateUI(await r.json()); } finally { btn.classList.remove('btn-loading'); } }
+        async function drinkWater(btn) { btn.classList.add('btn-loading'); if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium'); try { const r = await fetch(`${backendUrl}/drink_water/${userId}`, {method:'POST'}); updateUI(await r.json()); } finally { btn.classList.remove('btn-loading'); } }
 
         function showTab(name) {
             ['tasks', 'shop', 'history', 'calc'].forEach(t => { 
