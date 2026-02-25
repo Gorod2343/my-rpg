@@ -149,20 +149,30 @@
 
     <script>
         (function() {
-            // --- Инициализация Telegram ---
-            const tg = window.Telegram.WebApp;
-            tg.expand();
-            tg.ready(); // Сообщаем Telegram, что приложение готово
+            // Принудительное скрытие сплеш-экрана через 3 секунды (даже если произошла ошибка)
+            setTimeout(() => {
+                const splash = document.getElementById('splash-screen');
+                if (splash) splash.style.display = 'none';
+            }, 3000);
+
+            // --- Инициализация Telegram с защитой от отсутствия окружения ---
+            const tg = window.Telegram?.WebApp;
+            if (tg) {
+                tg.expand();
+                tg.ready();
+            } else {
+                console.warn('Приложение запущено вне Telegram, используется режим "guest"');
+            }
+            const userId = tg?.initDataUnsafe?.user?.id.toString() || "guest";
+            const firstName = tg?.initDataUnsafe?.user?.first_name || "Александр";
 
             // --- Константы ---
             const BACKEND_URL = "https://rpg-backend-yg16.onrender.com";
-            const userId = tg.initDataUnsafe?.user?.id.toString() || "guest";
-            const firstName = tg.initDataUnsafe?.user?.first_name || "Александр";
 
             // --- Состояние приложения ---
-            let currentHabits = [];               // массив объектов привычек
-            let completedTasksArray = [];          // массив ID выполненных сегодня задач (из бэкенда)
-            let editingId = null;                   // ID привычки в режиме редактирования
+            let currentHabits = [];
+            let completedTasksArray = [];
+            let editingId = null;
 
             // Элементы DOM
             const splashScreen = document.getElementById('splash-screen');
@@ -178,11 +188,10 @@
             const sleepBtnText = document.getElementById('sleep-btn-text');
             const sleepStatus = document.getElementById('sleep-status');
 
-            // Устанавливаем имя пользователя
             userNameEl.textContent = firstName;
             avatarContainer.textContent = firstName.charAt(0).toUpperCase();
 
-            // --- Функция экранирования HTML (для безопасной вставки) ---
+            // --- Функция экранирования HTML ---
             function escapeHtml(unsafe) {
                 return unsafe
                     .replace(/&/g, "&amp;")
@@ -196,14 +205,12 @@
             function updateUI(data) {
                 if (!data) return;
 
-                // Основные показатели
                 totalXpEl.textContent = data.total_xp || 0;
                 monthXpEl.textContent = data.current_month_xp || 0;
                 userHpEl.textContent = data.hp || 100;
                 hpBarEl.style.width = (data.hp || 100) + '%';
                 waterTextEl.textContent = `${data.water_count || 0} / ${data.water_goal || 8}`;
 
-                // Статус сна
                 if (data.sleep_start) {
                     btnSleep.classList.add('sleep-active');
                     sleepIcon.textContent = '☀️';
@@ -221,15 +228,12 @@
                     sleepStatus.textContent = 'OFF';
                 }
 
-                // Завершённые задачи (массив)
                 completedTasksArray = Array.isArray(data.completed_tasks) ? data.completed_tasks : [];
 
-                // Привычки (custom_habits) — JSON строка или пустая строка
                 try {
                     if (data.custom_habits && data.custom_habits.trim() !== '') {
                         currentHabits = JSON.parse(data.custom_habits);
                     } else {
-                        // Значения по умолчанию
                         currentHabits = [
                             { id: 'task-run', cat: 'sport', name: 'Пробежка', xp: 150 },
                             { id: 'task-strength', cat: 'sport', name: 'Силовая тренировка', xp: 200 },
@@ -245,17 +249,12 @@
                     ];
                 }
 
-                // Отрисовываем привычки в списках и редакторе
                 renderHabits();
-
-                // Отрисовываем историю (для вкладки "Жур")
                 renderHistory(data.history || []);
-
-                // Скрываем сплеш-экран
                 splashScreen.style.display = 'none';
             }
 
-            // --- Отрисовка привычек в основных списках и в редакторе ---
+            // --- Отрисовка привычек ---
             function renderHabits() {
                 const sportList = document.getElementById('list-sport');
                 const familyList = document.getElementById('list-family');
@@ -268,7 +267,7 @@
                     const isDone = completedTasksArray.includes(habit.id);
                     const habitNameEscaped = escapeHtml(habit.name);
 
-                    // Карточка в списке активностей (спорт/семья)
+                    // Карточка в списке активностей
                     const taskButton = document.createElement('button');
                     taskButton.className = `w-full text-left flex items-center gap-4 p-4 rounded-xl ${isDone ? 'done-task' : 'hover:bg-white/5'}`;
                     if (!isDone) {
@@ -282,11 +281,8 @@
                         <div class="text-blue-400 font-black text-xs">+${habit.xp}</div>
                     `;
 
-                    if (habit.cat === 'sport') {
-                        sportList.appendChild(taskButton);
-                    } else if (habit.cat === 'family') {
-                        familyList.appendChild(taskButton);
-                    }
+                    if (habit.cat === 'sport') sportList.appendChild(taskButton);
+                    else if (habit.cat === 'family') familyList.appendChild(taskButton);
 
                     // Карточка в редакторе
                     const editorCard = document.createElement('div');
@@ -302,7 +298,7 @@
                 });
             }
 
-            // --- Отрисовка истории событий ---
+            // --- Отрисовка истории ---
             function renderHistory(historyArray) {
                 const historyList = document.getElementById('history-list');
                 historyList.innerHTML = '';
@@ -326,9 +322,16 @@
                 });
             }
 
-            // --- Функции взаимодействия с бэкендом (с обработкой ошибок) ---
-
-            async function loadHero() {
-                // Таймаут на случай, если сервер не отвечает
-                const timeoutId = setTimeout(() => {
-                    splashScreen.style.d
+            // --- Функции запросов с обработкой ошибок ---
+            async function postAction(url, btn, onSuccess) {
+                if (btn) btn.classList.add('btn-loading');
+                try {
+                    const response = await fetch(url, { method: 'POST' });
+                    if (response.ok) {
+                        const data = await response.json();
+                        updateUI(data);
+                        if (onSuccess) onSuccess(data);
+                    } else {
+                        alert('Ошибка выполнения операции');
+                    }
+                } catch (
