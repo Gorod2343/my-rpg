@@ -1,22 +1,12 @@
 <!DOCTYPE html>
-<html lang="ru" class="dark">
+<html lang="ru">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self' https://telegram.org https://*.telegram.org https://cdn.tailwindcss.com;
-             script-src 'self' https://telegram.org https://*.telegram.org https://cdn.tailwindcss.com;
-             style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://fonts.googleapis.com;
-             font-src 'self' https://fonts.gstatic.com;
-             connect-src 'self' https://*.vercel.app https://*.render.com https://*.railway.app https://*.neon.tech;
-             img-src 'self' data: https:;
-             frame-ancestors 'none';" />
-  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
   <title>Life RPG</title>
-  <!-- Telegram SDK MUST be first script, with version param to avoid stale cache -->
+  <!-- Telegram SDK — загружается первым, до всего остального -->
   <script src="https://telegram.org/js/telegram-web-app.js?59"></script>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -25,97 +15,79 @@
       --bg-card2: #1c2433;
       --accent: #3b82f6;
       --accent2: #6366f1;
-      --accent-glow: rgba(99,102,241,0.35);
       --text-muted: #8b9ab0;
     }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html, body { background: var(--bg-base); color: #e2e8f0; font-family: 'Inter', sans-serif; margin: 0; padding: 0; min-height: 100vh; overscroll-behavior: none; }
-    /* Safe area padding - respect device notches and Telegram UI */
-    body {
-      padding-top: var(--tg-safe-area-inset-top, 0px);
-      padding-bottom: var(--tg-safe-area-inset-bottom, 0px);
-      padding-left: var(--tg-safe-area-inset-left, 0px);
-      padding-right: var(--tg-safe-area-inset-right, 0px);
+    html, body {
+      background: var(--bg-base);
+      color: #e2e8f0;
+      font-family: 'Inter', sans-serif;
+      margin: 0; padding: 0;
+      min-height: 100vh;
+      overscroll-behavior: none;
     }
-    #app {
-      padding-top: max(16px, var(--tg-content-safe-area-inset-top, 0px));
+    body {
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
     }
     .font-game { font-family: 'Orbitron', monospace; }
-    /* Splash */
     #splash { position: fixed; inset: 0; background: var(--bg-base); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; transition: opacity .4s; }
     #splash.hidden { opacity: 0; pointer-events: none; }
-    /* Loader ring */
     .loader-ring { width: 56px; height: 56px; border: 3px solid rgba(99,102,241,.2); border-top-color: #6366f1; border-radius: 50%; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    /* HP/XP bars */
     .bar-track { background: rgba(255,255,255,.07); border-radius: 999px; overflow: hidden; }
     .bar-fill { height: 100%; border-radius: 999px; transition: width .6s cubic-bezier(.4,0,.2,1); }
     .bar-hp { background: linear-gradient(90deg, #ef4444, #f97316); }
     .bar-xp { background: linear-gradient(90deg, #3b82f6, #6366f1); }
     .bar-water { background: linear-gradient(90deg, #06b6d4, #3b82f6); }
-    /* Cards */
     .card { background: var(--bg-card); border: 1px solid rgba(255,255,255,.06); border-radius: 16px; }
     .card-glow { box-shadow: 0 0 0 1px rgba(99,102,241,.15), 0 4px 24px rgba(0,0,0,.4); }
-    /* Nav */
-    #bottom-nav { background: rgba(22,27,34,.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,.08); }
+    #bottom-nav { background: rgba(22,27,34,.95); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,.08); }
     .nav-btn.active .nav-icon { color: #6366f1; }
     .nav-btn.active .nav-label { color: #6366f1; }
     .nav-btn .nav-icon { color: var(--text-muted); transition: color .2s; }
-    .nav-btn .nav-label { color: var(--text-muted); transition: color .2s; font-size: 10px; }
-    /* Sleep pulse */
+    .nav-btn .nav-label { color: var(--text-muted); font-size: 10px; }
     .sleep-active { animation: sleep-pulse 2s ease-in-out infinite; }
     @keyframes sleep-pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(99,102,241,.5); } 50% { box-shadow: 0 0 0 12px rgba(99,102,241,0); } }
-    /* Accordion */
     .accordion-body { overflow: hidden; transition: height .35s cubic-bezier(.4,0,.2,1); height: 0; }
-    /* Modal */
-    #modal-overlay { background: rgba(0,0,0,.7); backdrop-filter: blur(4px); }
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.12); border-radius: 4px; }
-    /* Task item */
+    #modal-overlay { background: rgba(0,0,0,.75); backdrop-filter: blur(4px); }
+    ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.12); border-radius: 4px; }
     .task-item.done { opacity: .45; }
-    /* Toast */
-    #toast-container { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 8888; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-    .toast { background: var(--bg-card2); border: 1px solid rgba(255,255,255,.1); border-radius: 12px; padding: 10px 18px; font-size: 13px; color: #e2e8f0; white-space: nowrap; animation: toast-in .3s ease; box-shadow: 0 4px 24px rgba(0,0,0,.5); }
-    .toast.success { border-color: rgba(34,197,94,.3); }
-    .toast.error { border-color: rgba(239,68,68,.3); }
+    #toast-container { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 8888; display: flex; flex-direction: column; gap: 8px; pointer-events: none; min-width: 200px; }
+    .toast { background: var(--bg-card2); border: 1px solid rgba(255,255,255,.1); border-radius: 12px; padding: 10px 18px; font-size: 13px; color: #e2e8f0; text-align: center; animation: toast-in .3s ease; box-shadow: 0 4px 24px rgba(0,0,0,.5); }
+    .toast.success { border-color: rgba(34,197,94,.4); }
+    .toast.error { border-color: rgba(239,68,68,.4); }
     @keyframes toast-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
-    /* Level badge */
     .level-badge { background: linear-gradient(135deg, #3b82f6, #6366f1); padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
-    /* Btn */
-    .btn-primary { background: linear-gradient(135deg, #3b82f6, #6366f1); border-radius: 12px; font-weight: 600; transition: opacity .2s, transform .15s; }
+    .btn-primary { background: linear-gradient(135deg, #3b82f6, #6366f1); border-radius: 12px; font-weight: 600; transition: opacity .2s, transform .1s; cursor: pointer; border: none; color: white; }
     .btn-primary:active { transform: scale(.97); }
     .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
-    .btn-secondary { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1); border-radius: 12px; transition: background .2s; }
-    .btn-secondary:active { background: rgba(255,255,255,.12); }
+    .btn-secondary { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1); border-radius: 12px; transition: background .2s; cursor: pointer; color: #e2e8f0; }
+    .btn-secondary:active { background: rgba(255,255,255,.14); }
+    input, select { color-scheme: dark; }
   </style>
 </head>
 <body>
 
-<!-- SPLASH SCREEN -->
 <div id="splash">
   <div class="flex flex-col items-center gap-6">
-    <div class="font-game text-3xl font-black tracking-widest" style="background: linear-gradient(135deg,#3b82f6,#6366f1); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">LIFE RPG</div>
+    <div class="font-game text-3xl font-black tracking-widest" style="background:linear-gradient(135deg,#3b82f6,#6366f1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">LIFE RPG</div>
     <div class="loader-ring" id="splash-loader"></div>
-    <div class="text-sm" id="splash-status" style="color: var(--text-muted);">Инициализация...</div>
-    <button id="splash-reload-btn" class="btn-primary px-6 py-2 text-sm text-white hidden">Перезагрузить</button>
+    <div class="text-sm" id="splash-status" style="color:var(--text-muted);">Инициализация...</div>
+    <button id="splash-reload-btn" class="btn-primary px-6 py-2 text-sm hidden">Перезагрузить</button>
   </div>
 </div>
 
-<!-- TOAST CONTAINER -->
 <div id="toast-container"></div>
 
-<!-- MODAL OVERLAY -->
 <div id="modal-overlay" class="fixed inset-0 z-50 hidden flex items-end justify-center pb-6 px-4">
-  <div id="modal-box" class="card card-glow w-full max-w-sm p-5" style="max-height:80vh; overflow-y:auto;"></div>
+  <div id="modal-box" class="card card-glow w-full max-w-sm p-5" style="max-height:80vh;overflow-y:auto;"></div>
 </div>
 
-<!-- MAIN APP -->
-<div id="app" class="pb-28 px-3 pt-4 max-w-lg mx-auto hidden">
+<div id="app" class="pb-28 px-3 max-w-lg mx-auto hidden" style="padding-top:16px;">
 
-  <!-- ── TAB: PATH ── -->
+  <!-- TAB: PATH -->
   <div id="tab-path" class="tab-panel space-y-4">
-
-    <!-- Hero Header -->
     <div class="card card-glow p-4">
       <div class="flex items-center justify-between mb-3">
         <div>
@@ -125,7 +97,7 @@
           </div>
           <div class="flex items-center gap-1 mt-0.5">
             <span class="text-xs" style="color:var(--text-muted);">🔥 Серия:</span>
-            <span class="text-xs font-semibold text-orange-400" id="hero-streak">0</span>
+            <span class="text-xs font-semibold text-orange-400" id="hero-streak">0 дн.</span>
           </div>
         </div>
         <div class="text-right">
@@ -133,32 +105,23 @@
           <div class="font-game text-xl font-bold" style="color:#f59e0b;" id="hero-month-xp">0</div>
         </div>
       </div>
-      <!-- HP bar -->
       <div class="mb-2">
         <div class="flex justify-between text-xs mb-1">
           <span style="color:var(--text-muted);">❤️ HP</span>
           <span id="hero-hp-text" class="text-red-400 font-semibold">100/100</span>
         </div>
-        <div class="bar-track h-2.5">
-          <div class="bar-fill bar-hp" id="hero-hp-bar" style="width:100%"></div>
-        </div>
+        <div class="bar-track h-2.5"><div class="bar-fill bar-hp" id="hero-hp-bar" style="width:100%"></div></div>
       </div>
-      <!-- XP bar -->
       <div>
         <div class="flex justify-between text-xs mb-1">
           <span style="color:var(--text-muted);">⚡ XP</span>
           <span id="hero-xp-text" class="text-blue-400 font-semibold">0/100</span>
         </div>
-        <div class="bar-track h-2">
-          <div class="bar-fill bar-xp" id="hero-xp-bar" style="width:0%"></div>
-        </div>
+        <div class="bar-track h-2"><div class="bar-fill bar-xp" id="hero-xp-bar" style="width:0%"></div></div>
       </div>
     </div>
 
-    <!-- Water & Sleep row -->
     <div class="grid grid-cols-2 gap-3">
-
-      <!-- Water Card -->
       <div class="card card-glow p-4 flex flex-col justify-between min-h-[140px]">
         <div>
           <div class="text-xs font-semibold mb-2" style="color:var(--text-muted);">💧 ВОДА</div>
@@ -166,52 +129,44 @@
             <span class="font-game text-2xl font-bold text-cyan-400" id="water-count">0</span>
             <span class="text-sm" style="color:var(--text-muted);">/ <span id="water-goal">8</span></span>
           </div>
-          <div class="bar-track h-1.5 mb-3">
-            <div class="bar-fill bar-water" id="water-bar" style="width:0%"></div>
-          </div>
+          <div class="bar-track h-1.5 mb-3"><div class="bar-fill bar-water" id="water-bar" style="width:0%"></div></div>
         </div>
-        <button id="btn-water" class="btn-primary w-full py-2 text-sm text-white">+1 глоток</button>
+        <button id="btn-water" class="btn-primary w-full py-2 text-sm">+1 глоток</button>
       </div>
-
-      <!-- Sleep Card -->
       <div class="card card-glow p-4 flex flex-col justify-between min-h-[140px]">
         <div>
           <div class="text-xs font-semibold mb-2" style="color:var(--text-muted);">😴 СОН</div>
           <div class="text-xs mb-2" id="sleep-status" style="color:var(--text-muted);">Не сплю</div>
           <div class="text-xs font-mono text-indigo-400" id="sleep-timer"></div>
         </div>
-        <button id="btn-sleep" class="btn-primary w-full py-2 text-sm text-white">🌙 Уснуть</button>
+        <button id="btn-sleep" class="btn-primary w-full py-2 text-sm">🌙 Уснуть</button>
       </div>
-
     </div>
 
-    <!-- Activity Accordion -->
     <div class="card card-glow">
-      <button id="accordion-activity-btn" class="w-full flex items-center justify-between px-4 py-3 text-left">
+      <button id="accordion-activity-btn" class="w-full flex items-center justify-between px-4 py-3">
         <span class="font-semibold text-sm">🏃 Активность</span>
-        <span class="text-lg accordion-arrow" id="arrow-activity">›</span>
+        <span class="text-lg transition-transform duration-300" id="arrow-activity" style="color:var(--text-muted);">›</span>
       </button>
       <div class="accordion-body" id="accordion-activity-body">
         <div class="px-4 pb-4 space-y-2" id="list-activity"></div>
       </div>
     </div>
 
-    <!-- Relations Accordion -->
     <div class="card card-glow">
-      <button id="accordion-relations-btn" class="w-full flex items-center justify-between px-4 py-3 text-left">
+      <button id="accordion-relations-btn" class="w-full flex items-center justify-between px-4 py-3">
         <span class="font-semibold text-sm">🤝 Отношения</span>
-        <span class="text-lg accordion-arrow" id="arrow-relations">›</span>
+        <span class="text-lg transition-transform duration-300" id="arrow-relations" style="color:var(--text-muted);">›</span>
       </button>
       <div class="accordion-body" id="accordion-relations-body">
         <div class="px-4 pb-4 space-y-2" id="list-relations"></div>
       </div>
     </div>
 
-    <!-- Custom Habits Accordion -->
     <div class="card card-glow">
-      <button id="accordion-custom-btn" class="w-full flex items-center justify-between px-4 py-3 text-left">
+      <button id="accordion-custom-btn" class="w-full flex items-center justify-between px-4 py-3">
         <span class="font-semibold text-sm">✨ Мои привычки</span>
-        <span class="text-lg accordion-arrow" id="arrow-custom">›</span>
+        <span class="text-lg transition-transform duration-300" id="arrow-custom" style="color:var(--text-muted);">›</span>
       </button>
       <div class="accordion-body" id="accordion-custom-body">
         <div class="px-4 pb-2 space-y-2" id="list-custom"></div>
@@ -220,16 +175,17 @@
         </div>
       </div>
     </div>
-
   </div>
 
-  <!-- ── TAB: BIO ── -->
+  <!-- TAB: BIO -->
   <div id="tab-bio" class="tab-panel space-y-4 hidden">
     <div class="card card-glow p-5 space-y-4">
       <div class="font-game font-bold text-base">🧬 Биометрия</div>
       <div>
         <label class="block text-xs mb-1" style="color:var(--text-muted);">Вес (кг)</label>
-        <input id="bio-weight" type="number" min="30" max="300" step="0.5" class="w-full rounded-xl px-3 py-2.5 text-sm bg-opacity-10 focus:outline-none focus:ring-2 focus:ring-indigo-500" style="background:rgba(255,255,255,.07); color:#e2e8f0; border:1px solid rgba(255,255,255,.1);" placeholder="70" />
+        <input id="bio-weight" type="number" min="30" max="300" step="0.5"
+          class="w-full rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          style="background:rgba(255,255,255,.07);color:#e2e8f0;border:1px solid rgba(255,255,255,.1);" placeholder="70" />
       </div>
       <div>
         <label class="block text-xs mb-1" style="color:var(--text-muted);">Коэффициент активности</label>
@@ -238,11 +194,11 @@
       <div class="text-sm" style="color:var(--text-muted);">
         Норма воды: <span class="font-semibold text-cyan-400" id="bio-water-calc">—</span> стаканов/день
       </div>
-      <button id="btn-bio-save" class="btn-primary w-full py-3 text-sm text-white">Сохранить</button>
+      <button id="btn-bio-save" class="btn-primary w-full py-3 text-sm">Сохранить</button>
     </div>
   </div>
 
-  <!-- ── TAB: SHOP ── -->
+  <!-- TAB: SHOP -->
   <div id="tab-shop" class="tab-panel hidden">
     <div class="card card-glow p-4 mb-4">
       <div class="text-xs" style="color:var(--text-muted);">Монеты этого месяца</div>
@@ -251,36 +207,635 @@
     <div class="space-y-3" id="shop-list"></div>
   </div>
 
-  <!-- ── TAB: JOURNAL ── -->
+  <!-- TAB: JOURNAL -->
   <div id="tab-journal" class="tab-panel hidden">
     <div class="font-game font-bold text-sm mb-3 px-1">📜 История</div>
     <div class="space-y-2" id="journal-list">
-      <div class="text-sm text-center py-8" style="color:var(--text-muted);">Загрузка...</div>
+      <div class="text-sm text-center py-8" style="color:var(--text-muted);">Нажмите для загрузки</div>
     </div>
   </div>
 
 </div>
 
-<!-- BOTTOM NAV -->
-<nav id="bottom-nav" class="fixed bottom-6 left-1/2 -translate-x-1/2 rounded-2xl px-2 py-2 flex gap-1 z-40" style="width:calc(100% - 32px); max-width:400px;">
+<nav id="bottom-nav" class="fixed bottom-4 left-1/2 -translate-x-1/2 rounded-2xl px-2 py-2 flex gap-1 z-40"
+  style="width:calc(100% - 24px);max-width:420px;">
   <button class="nav-btn active flex-1 flex flex-col items-center py-1.5 gap-0.5 rounded-xl" data-tab="path">
-    <span class="nav-icon text-xl">⚔️</span>
-    <span class="nav-label font-medium">Путь</span>
+    <span class="nav-icon text-xl">⚔️</span><span class="nav-label font-medium">Путь</span>
   </button>
   <button class="nav-btn flex-1 flex flex-col items-center py-1.5 gap-0.5 rounded-xl" data-tab="bio">
-    <span class="nav-icon text-xl">🧬</span>
-    <span class="nav-label font-medium">Био</span>
+    <span class="nav-icon text-xl">🧬</span><span class="nav-label font-medium">Био</span>
   </button>
   <button class="nav-btn flex-1 flex flex-col items-center py-1.5 gap-0.5 rounded-xl" data-tab="shop">
-    <span class="nav-icon text-xl">🛒</span>
-    <span class="nav-label font-medium">Маг</span>
+    <span class="nav-icon text-xl">🛒</span><span class="nav-label font-medium">Маг</span>
   </button>
   <button class="nav-btn flex-1 flex flex-col items-center py-1.5 gap-0.5 rounded-xl" data-tab="journal">
-    <span class="nav-icon text-xl">📜</span>
-    <span class="nav-label font-medium">Жур</span>
+    <span class="nav-icon text-xl">📜</span><span class="nav-label font-medium">Жур</span>
   </button>
 </nav>
 
-<script src="app.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  // ── CONFIG ──
+  const API_BASE = ""; // Поменяйте на URL вашего бэкенда, например: "https://myapp.render.com"
+  const HERO_CACHE_TTL = 10000;
+
+  const ACTIVITY_OPTIONS = [
+    { value: 1.0,    label: "🪑 Сидячий",   sub: "×1.0" },
+    { value: 1.375,  label: "🚶 Лёгкий",    sub: "×1.375" },
+    { value: 1.55,   label: "🏃 Умеренный", sub: "×1.55" },
+    { value: 1.725,  label: "💪 Высокий",   sub: "×1.725" },
+  ];
+
+  const EVENT_ICONS = { water:"💧", sleep:"😴", task:"✅", shop:"🛒", penalty:"⚠️" };
+
+  // ── STATE ──
+  let heroData = null;
+  let heroLastFetch = 0;
+  let isLocked = false;
+  let initData = "";
+  let sleepTimerInterval = null;
+  let selectedActivityFactor = 1.375;
+  let currentTab = "path";
+
+  // ── DETECT MODE ──
+  const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
+  const IS_DEV = !tg || !tg.initData;
+
+  // ── MOCK DATA ──
+  const MOCK_HERO = {
+    telegram_id:"dev_user", first_name:"Герой", username:"hero",
+    hp:78, xp:340, level:3, current_month_xp:145,
+    xp_current:40, xp_needed:132,
+    water_count:3, water_goal:8, weight:70, activity_factor:1.375,
+    completed_tasks:["meditation","reading"],
+    sleep_start:null, coins:0, streak:7,
+    custom_habits:[
+      {id:"custom_demo1", name:"Контрастный душ", xp:20, category:"custom"},
+      {id:"custom_demo2", name:"Без телефона утром", xp:15, category:"custom"},
+    ],
+    tasks:{
+      workout_light:  {name:"Лёгкая тренировка",       xp:20, category:"activity"},
+      workout_medium: {name:"Средняя тренировка",       xp:35, category:"activity"},
+      workout_hard:   {name:"Интенсивная тренировка",   xp:50, category:"activity"},
+      meditation:     {name:"Медитация 10 мин",         xp:15, category:"activity"},
+      reading:        {name:"Чтение 30 мин",            xp:15, category:"activity"},
+      walk:           {name:"Прогулка на свежем воздухе",xp:20, category:"activity"},
+      friend_call:    {name:"Позвонить другу",          xp:20, category:"relations"},
+      family_time:    {name:"Провести время с семьёй",  xp:25, category:"relations"},
+      gratitude:      {name:"Написать благодарность",   xp:10, category:"relations"},
+      social_event:   {name:"Социальное мероприятие",   xp:30, category:"relations"},
+    },
+    rewards:{
+      coffee:     {name:"☕ Кофе с собой",  cost:50,  description:"Заслуженный кофе"},
+      movie:      {name:"🎬 Кино",          cost:100, description:"Поход в кино"},
+      game_hour:  {name:"🎮 Час игр",       cost:75,  description:"Час любимых игр"},
+      cheat_meal: {name:"🍕 Читмил",        cost:120, description:"Читмил без угрызений"},
+      spa:        {name:"💆 Спа-день",      cost:300, description:"День отдыха"},
+    },
+  };
+
+  // ── DOM BUILDER (no innerHTML) ──
+  function el(tag, attrs, children) {
+    const node = document.createElement(tag);
+    if (attrs) for (const [k, v] of Object.entries(attrs)) {
+      if (k === "className") node.className = v;
+      else if (k === "textContent") node.textContent = v;
+      else if (k === "style") Object.assign(node.style, v);
+      else if (k.startsWith("on")) {} // skip - use addEventListener
+      else node.setAttribute(k, v);
+    }
+    if (children) for (const c of children) {
+      if (!c) continue;
+      node.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+    }
+    return node;
+  }
+  function clearEl(node) { while (node.firstChild) node.removeChild(node.firstChild); }
+
+  // ── TOAST ──
+  function showToast(msg, type = "info", duration = 2500) {
+    const container = document.getElementById("toast-container");
+    const toast = el("div", {className:`toast ${type}`, textContent:msg});
+    container.appendChild(toast);
+    setTimeout(() => {
+      toast.style.opacity = "0";
+      toast.style.transition = "opacity .3s";
+      setTimeout(() => toast.parentNode && toast.parentNode.removeChild(toast), 300);
+    }, duration);
+  }
+
+  // ── HAPTIC ──
+  function haptic(type = "light") {
+    try {
+      if (tg && tg.HapticFeedback) {
+        if (type === "success") tg.HapticFeedback.notificationOccurred("success");
+        else if (type === "error") tg.HapticFeedback.notificationOccurred("error");
+        else tg.HapticFeedback.impactOccurred(type);
+      }
+    } catch(e) {}
+  }
+
+  // ── API ──
+  async function apiGet(path) {
+    if (IS_DEV) return mockApiGet(path);
+    const res = await fetch(API_BASE + path, { headers: {"X-Telegram-Init-Data": initData} });
+    if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.detail||"Ошибка сети"); }
+    return res.json();
+  }
+  async function apiPost(path, body) {
+    if (IS_DEV) return mockApiPost(path, body);
+    const res = await fetch(API_BASE + path, {
+      method: "POST",
+      headers: {"Content-Type":"application/json","X-Telegram-Init-Data":initData},
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.detail||"Ошибка сети"); }
+    return res.json();
+  }
+
+  // ── MOCK API ──
+  function mockApiGet(path) {
+    if (path === "/api/hero") return Promise.resolve(JSON.parse(JSON.stringify(heroData || MOCK_HERO)));
+    if (path === "/api/history") return Promise.resolve({ history: [
+      {id:1,event_type:"task",description:"Медитация 10 мин",xp_delta:15,hp_delta:0,timestamp:new Date().toISOString()},
+      {id:2,event_type:"water",description:"Выпито 1 стакан воды",xp_delta:5,hp_delta:5,timestamp:new Date(Date.now()-3600000).toISOString()},
+      {id:3,event_type:"sleep",description:"Сон 7.5ч засчитан",xp_delta:80,hp_delta:20,timestamp:new Date(Date.now()-86400000).toISOString()},
+      {id:4,event_type:"penalty",description:"Штраф за 2 пропущенных дня",xp_delta:0,hp_delta:-30,timestamp:new Date(Date.now()-172800000).toISOString()},
+    ]});
+    return Promise.resolve({});
+  }
+  function mockApiPost(path, body) {
+    const h = heroData;
+    if (path === "/api/water") {
+      h.water_count = Math.min((h.water_count||0) + (body.amount||1), h.water_goal + 5);
+      h.hp = Math.min(100, h.hp + 5);
+      h.xp += 5; h.current_month_xp += 5; h.xp_current = (h.xp_current||0)+5;
+      return Promise.resolve({ok:true,xp_gained:5,hp_gained:5,hero:JSON.parse(JSON.stringify(h))});
+    }
+    if (path === "/api/sleep/start") {
+      const now = new Date().toISOString();
+      h.sleep_start = now;
+      return Promise.resolve({ok:true,sleep_start:now});
+    }
+    if (path === "/api/sleep/end") {
+      h.sleep_start = null; h.xp+=50; h.current_month_xp+=50; h.xp_current+=50; h.hp=Math.min(100,h.hp+20);
+      return Promise.resolve({ok:true,xp_gained:50,hp_gained:20,duration_hours:7.5,message:"Сон 7.5ч засчитан",hero:JSON.parse(JSON.stringify(h))});
+    }
+    if (path === "/api/task/complete") {
+      const taskId = body.task_id;
+      if (h.completed_tasks.includes(taskId)) return Promise.reject(new Error("Задача уже выполнена сегодня"));
+      const allTasks = {...(h.tasks||{}), ...Object.fromEntries((h.custom_habits||[]).map(x=>[x.id,x]))};
+      const task = allTasks[taskId];
+      if (!task) return Promise.reject(new Error("Задача не найдена"));
+      h.completed_tasks = [...h.completed_tasks, taskId];
+      h.xp += task.xp; h.current_month_xp += task.xp; h.xp_current += task.xp;
+      return Promise.resolve({ok:true,xp_gained:task.xp,hero:JSON.parse(JSON.stringify(h))});
+    }
+    if (path === "/api/shop/buy") {
+      const reward = h.rewards[body.reward_id];
+      if (!reward) return Promise.reject(new Error("Награда не найдена"));
+      if (h.current_month_xp < reward.cost) return Promise.reject(new Error("Недостаточно монет"));
+      h.current_month_xp -= reward.cost;
+      return Promise.resolve({ok:true,purchased:reward.name,hero:JSON.parse(JSON.stringify(h))});
+    }
+    if (path === "/api/bio/update") {
+      h.weight = body.weight; h.activity_factor = body.activity_factor;
+      h.water_goal = Math.max(1, Math.round(body.weight * body.activity_factor / 250));
+      return Promise.resolve({ok:true,water_goal:h.water_goal,hero:JSON.parse(JSON.stringify(h))});
+    }
+    if (path === "/api/habit/add") {
+      const id = "custom_" + Math.random().toString(36).slice(2,10);
+      h.custom_habits = [...(h.custom_habits||[]), {id,name:body.name,xp:body.xp,category:body.category}];
+      return Promise.resolve({ok:true,habit_id:id,hero:JSON.parse(JSON.stringify(h))});
+    }
+    if (path === "/api/habit/edit") {
+      h.custom_habits = (h.custom_habits||[]).map(x => x.id===body.habit_id ? {...x,name:body.name,xp:body.xp} : x);
+      return Promise.resolve({ok:true,hero:JSON.parse(JSON.stringify(h))});
+    }
+    if (path === "/api/habit/delete") {
+      h.custom_habits = (h.custom_habits||[]).filter(x => x.id!==body.habit_id);
+      return Promise.resolve({ok:true,hero:JSON.parse(JSON.stringify(h))});
+    }
+    return Promise.resolve({ok:true});
+  }
+
+  // ── LOCK ──
+  async function withLock(fn) {
+    if (isLocked) return;
+    isLocked = true;
+    haptic("light");
+    try { await fn(); }
+    catch(e) { haptic("error"); showToast(e.message||"Ошибка","error"); }
+    finally { isLocked = false; }
+  }
+
+  // ── HERO LOAD ──
+  async function loadHero(force = false) {
+    const now = Date.now();
+    if (!force && heroData && now - heroLastFetch < HERO_CACHE_TTL) { renderHero(heroData); return heroData; }
+    const data = await apiGet("/api/hero");
+    heroData = data;
+    heroLastFetch = Date.now();
+    renderHero(data);
+    return data;
+  }
+
+  // ── RENDER HERO ──
+  function setText(id, val) { const n=document.getElementById(id); if(n) n.textContent=String(val); }
+  function setWidth(id, val) { const n=document.getElementById(id); if(n) n.style.width=val; }
+
+  function renderHero(d) {
+    setText("hero-name", d.first_name||d.username||"Герой");
+    setText("hero-level", `Ур.${d.level}`);
+    setText("hero-streak", `${d.streak} дн.`);
+    setText("hero-month-xp", d.current_month_xp);
+    setText("hero-hp-text", `${d.hp}/100`);
+    setText("hero-xp-text", `${d.xp_current}/${d.xp_needed}`);
+    setText("water-count", d.water_count);
+    setText("water-goal", d.water_goal);
+    setText("shop-month-xp", d.current_month_xp);
+    setWidth("hero-hp-bar", `${d.hp}%`);
+    setWidth("hero-xp-bar", `${Math.min(100,Math.round(d.xp_current/d.xp_needed*100))}%`);
+    const wPct = d.water_goal>0 ? Math.min(100,Math.round(d.water_count/d.water_goal*100)) : 0;
+    setWidth("water-bar", `${wPct}%`);
+    renderSleepState(d.sleep_start);
+    renderTaskLists(d);
+    renderShop(d);
+    renderCustomHabits(d);
+    const bw = document.getElementById("bio-weight");
+    if (bw && !bw.dataset.dirty) bw.value = d.weight||70;
+    selectedActivityFactor = d.activity_factor||1.375;
+    renderActivitySelector();
+    updateWaterCalc();
+  }
+
+  // ── SLEEP ──
+  function renderSleepState(sleepStart) {
+    const btn = document.getElementById("btn-sleep");
+    const statusEl = document.getElementById("sleep-status");
+    const timerEl = document.getElementById("sleep-timer");
+    if (sleepTimerInterval) { clearInterval(sleepTimerInterval); sleepTimerInterval=null; }
+    if (sleepStart) {
+      const startDate = new Date(sleepStart);
+      btn.textContent = "☀️ Проснуться";
+      btn.classList.add("sleep-active");
+      statusEl.textContent = `Засыпание: ${startDate.toLocaleTimeString("ru",{hour:"2-digit",minute:"2-digit"})}`;
+      const tick = () => {
+        const diff = Math.floor((Date.now()-startDate.getTime())/1000);
+        const h=Math.floor(diff/3600), m=Math.floor((diff%3600)/60), s=diff%60;
+        timerEl.textContent = `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+      };
+      tick();
+      sleepTimerInterval = setInterval(tick, 1000);
+    } else {
+      btn.textContent = "🌙 Уснуть";
+      btn.classList.remove("sleep-active");
+      statusEl.textContent = "Не сплю";
+      timerEl.textContent = "";
+    }
+  }
+
+  // ── TASK LISTS ──
+  function renderTaskLists(d) {
+    const completed = d.completed_tasks||[];
+    const actList = document.getElementById("list-activity");
+    const relList = document.getElementById("list-relations");
+    clearEl(actList); clearEl(relList);
+    for (const [tid, task] of Object.entries(d.tasks||{})) {
+      const item = buildTaskItem(tid, task.name, task.xp, completed.includes(tid));
+      if (task.category==="activity") actList.appendChild(item);
+      else if (task.category==="relations") relList.appendChild(item);
+    }
+  }
+
+  function buildTaskItem(taskId, name, xp, isDone) {
+    const row = el("div", {className:`task-item flex items-center justify-between gap-2 p-3 rounded-xl${isDone?" done":""}`, style:{background:"rgba(255,255,255,.04)"}});
+    const left = el("div", {className:"flex items-center gap-2 flex-1 min-w-0"});
+    left.appendChild(el("span",{textContent:isDone?"✅":"⭕",style:{flexShrink:"0"}}));
+    left.appendChild(el("span",{className:"text-sm truncate",textContent:name}));
+    const right = el("div",{className:"flex items-center gap-2 flex-shrink-0"});
+    right.appendChild(el("span",{className:"text-xs font-semibold text-blue-400",textContent:`+${xp} XP`}));
+    if (!isDone) {
+      const btn = el("button",{className:"btn-primary text-xs px-3 py-1.5",textContent:"Выполнить"});
+      btn.addEventListener("click",()=>withLock(()=>doCompleteTask(taskId)));
+      right.appendChild(btn);
+    }
+    row.appendChild(left); row.appendChild(right);
+    return row;
+  }
+
+  // ── CUSTOM HABITS ──
+  function renderCustomHabits(d) {
+    const list = document.getElementById("list-custom");
+    clearEl(list);
+    const habits = d.custom_habits||[], completed=d.completed_tasks||[];
+    if (!habits.length) {
+      list.appendChild(el("div",{className:"text-xs py-2",textContent:"Нет привычек. Добавьте первую!",style:{color:"var(--text-muted)"}}));
+      return;
+    }
+    for (const habit of habits) {
+      const isDone = completed.includes(habit.id);
+      const row = el("div",{className:"flex items-center justify-between gap-2 p-3 rounded-xl",style:{background:"rgba(255,255,255,.04)"}});
+      const left = el("div",{className:"flex items-center gap-2 flex-1 min-w-0"});
+      left.appendChild(el("span",{textContent:isDone?"✅":"⭕",style:{flexShrink:"0"}}));
+      left.appendChild(el("span",{className:"text-sm truncate",textContent:habit.name}));
+      left.appendChild(el("span",{className:"text-xs text-blue-400 ml-1",textContent:`+${habit.xp}XP`}));
+      const right = el("div",{className:"flex items-center gap-1 flex-shrink-0"});
+      if (!isDone) {
+        const db = el("button",{className:"btn-primary text-xs px-2 py-1.5",textContent:"✓"});
+        db.addEventListener("click",()=>withLock(()=>doCompleteTask(habit.id)));
+        right.appendChild(db);
+      }
+      const eb = el("button",{className:"btn-secondary text-xs px-2 py-1.5",textContent:"✏️"});
+      eb.addEventListener("click",()=>openEditHabitModal(habit));
+      right.appendChild(eb);
+      row.appendChild(left); row.appendChild(right);
+      list.appendChild(row);
+    }
+  }
+
+  // ── SHOP ──
+  function renderShop(d) {
+    const list = document.getElementById("shop-list");
+    if (!list||!d.rewards) return;
+    clearEl(list);
+    for (const [rid, reward] of Object.entries(d.rewards)) {
+      const canAfford = d.current_month_xp >= reward.cost;
+      const card = el("div",{className:"card card-glow p-4 flex items-center justify-between gap-3"});
+      const left = el("div",{className:"flex-1 min-w-0"});
+      left.appendChild(el("div",{className:"font-semibold text-sm",textContent:reward.name}));
+      left.appendChild(el("div",{className:"text-xs mt-0.5",textContent:reward.description,style:{color:"var(--text-muted)"}}));
+      const right = el("div",{className:"flex flex-col items-end gap-2 flex-shrink-0"});
+      right.appendChild(el("div",{className:"font-game text-sm font-bold",textContent:`${reward.cost} 🪙`,style:{color:canAfford?"#f59e0b":"var(--text-muted)"}}));
+      const btn = el("button",{className:`btn-primary text-xs px-4 py-1.5${canAfford?"":" opacity-40"}`,textContent:"Купить"});
+      if (canAfford) btn.addEventListener("click",()=>withLock(()=>doBuyReward(rid)));
+      right.appendChild(btn);
+      card.appendChild(left); card.appendChild(right);
+      list.appendChild(card);
+    }
+  }
+
+  // ── JOURNAL ──
+  async function loadJournal() {
+    const list = document.getElementById("journal-list");
+    clearEl(list);
+    list.appendChild(el("div",{className:"text-sm text-center py-8",textContent:"Загрузка...",style:{color:"var(--text-muted)"}}));
+    try {
+      const data = await apiGet("/api/history");
+      clearEl(list);
+      if (!data.history||!data.history.length) {
+        list.appendChild(el("div",{className:"text-sm text-center py-8",textContent:"История пуста",style:{color:"var(--text-muted)"}}));
+        return;
+      }
+      for (const r of data.history) {
+        const icon = EVENT_ICONS[r.event_type]||"📌";
+        const dt = new Date(r.timestamp);
+        const timeStr = dt.toLocaleString("ru",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"});
+        const row = el("div",{className:"card p-3 flex items-center gap-3"});
+        row.appendChild(el("span",{className:"text-xl flex-shrink-0",textContent:icon}));
+        const mid = el("div",{className:"flex-1 min-w-0"});
+        mid.appendChild(el("div",{className:"text-sm truncate",textContent:r.description}));
+        mid.appendChild(el("div",{className:"text-xs mt-0.5",textContent:timeStr,style:{color:"var(--text-muted)"}}));
+        const right = el("div",{className:"text-xs flex-shrink-0 flex flex-col items-end gap-0.5"});
+        if (r.xp_delta!==0) right.appendChild(el("span",{className:r.xp_delta>0?"text-blue-400":"text-red-400",textContent:(r.xp_delta>0?"+":"")+r.xp_delta+" XP"}));
+        if (r.hp_delta!==0) right.appendChild(el("span",{className:r.hp_delta>0?"text-green-400":"text-red-400",textContent:(r.hp_delta>0?"+":"")+r.hp_delta+" HP"}));
+        row.appendChild(mid); row.appendChild(right);
+        list.appendChild(row);
+      }
+    } catch(e) {
+      clearEl(list);
+      list.appendChild(el("div",{className:"text-sm text-center py-8 text-red-400",textContent:"Ошибка загрузки"}));
+    }
+  }
+
+  // ── ACTIONS ──
+  async function doAddWater() {
+    const data = await apiPost("/api/water",{amount:1});
+    heroData=data.hero; heroLastFetch=Date.now(); renderHero(data.hero);
+    haptic("success"); showToast(`+${data.xp_gained} XP 💧 +${data.hp_gained} HP`,"success");
+  }
+  async function doSleep() {
+    if (heroData&&heroData.sleep_start) {
+      const data = await apiPost("/api/sleep/end",{});
+      heroData=data.hero; heroLastFetch=Date.now(); renderHero(data.hero);
+      haptic("success"); showToast(data.message+` +${data.xp_gained} XP`,"success");
+    } else {
+      const data = await apiPost("/api/sleep/start",{});
+      if (heroData) heroData.sleep_start=data.sleep_start;
+      renderSleepState(data.sleep_start);
+      haptic("success"); showToast("Спокойной ночи! 🌙","success");
+    }
+  }
+  async function doCompleteTask(taskId) {
+    const data = await apiPost("/api/task/complete",{task_id:taskId});
+    heroData=data.hero; heroLastFetch=Date.now(); renderHero(data.hero);
+    haptic("success"); showToast(`+${data.xp_gained} XP ✅`,"success");
+  }
+  async function doBuyReward(rid) {
+    const data = await apiPost("/api/shop/buy",{reward_id:rid});
+    heroData=data.hero; heroLastFetch=Date.now(); renderHero(data.hero);
+    haptic("success"); showToast(`Куплено: ${data.purchased} 🎉`,"success");
+  }
+  async function doSaveBio() {
+    const w = parseFloat(document.getElementById("bio-weight").value);
+    if (!w||w<=0||w>500) { showToast("Введите корректный вес","error"); return; }
+    const data = await apiPost("/api/bio/update",{weight:w,activity_factor:selectedActivityFactor});
+    heroData=data.hero; heroLastFetch=Date.now(); renderHero(data.hero);
+    document.getElementById("bio-weight").dataset.dirty="";
+    haptic("success"); showToast("Сохранено ✅","success");
+  }
+
+  // ── MODALS ──
+  function openModal() { document.getElementById("modal-overlay").classList.remove("hidden"); }
+  function closeModal() { document.getElementById("modal-overlay").classList.add("hidden"); clearEl(document.getElementById("modal-box")); }
+
+  function buildModalInput(label, type, placeholder, value, min, max) {
+    const wrap = el("div");
+    wrap.appendChild(el("label",{className:"block text-xs mb-1",textContent:label,style:{color:"var(--text-muted)"}}));
+    const input = el("input",{type,placeholder,className:"w-full rounded-xl px-3 py-2.5 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-500",style:{background:"rgba(255,255,255,.07)",color:"#e2e8f0",border:"1px solid rgba(255,255,255,.1)"}});
+    if (value!==undefined) input.value = value;
+    if (min) input.min = min;
+    if (max) input.max = max;
+    wrap.appendChild(input);
+    return { wrap, input };
+  }
+
+  function openAddHabitModal() {
+    const box = document.getElementById("modal-box");
+    clearEl(box);
+    box.appendChild(el("div",{className:"font-game font-bold text-base mb-4",textContent:"✨ Новая привычка"}));
+    const {wrap:nw, input:nameInput} = buildModalInput("Название","text","Пробежка 3км");
+    const {wrap:xw, input:xpInput} = buildModalInput("XP за выполнение","number","25",undefined,"1","200");
+    box.appendChild(nw); box.appendChild(xw);
+    box.appendChild(el("label",{className:"block text-xs mb-1",textContent:"Категория",style:{color:"var(--text-muted)"}}));
+    const sel = el("select",{className:"w-full rounded-xl px-3 py-2.5 text-sm mb-4 focus:outline-none",style:{background:"rgba(22,27,34,1)",color:"#e2e8f0",border:"1px solid rgba(255,255,255,.1)"}});
+    [["activity","🏃 Активность"],["relations","🤝 Отношения"],["custom","✨ Своя"]].forEach(([v,t])=>sel.appendChild(el("option",{value:v,textContent:t})));
+    box.appendChild(sel);
+    const row = el("div",{className:"flex gap-2"});
+    const cb = el("button",{className:"btn-secondary flex-1 py-2.5 text-sm",textContent:"Отмена"});
+    cb.addEventListener("click",closeModal);
+    const ab = el("button",{className:"btn-primary flex-1 py-2.5 text-sm",textContent:"Добавить"});
+    ab.addEventListener("click",()=>withLock(async()=>{
+      const name=nameInput.value.trim(), xp=parseInt(xpInput.value,10);
+      if (!name){showToast("Введите название","error");return;}
+      if (!xp||xp<=0){showToast("XP должно быть > 0","error");return;}
+      const data=await apiPost("/api/habit/add",{name,xp,category:sel.value});
+      heroData=data.hero; heroLastFetch=Date.now(); renderHero(data.hero);
+      closeModal(); showToast("Привычка добавлена!","success");
+    }));
+    row.appendChild(cb); row.appendChild(ab);
+    box.appendChild(row);
+    openModal();
+  }
+
+  function openEditHabitModal(habit) {
+    const box = document.getElementById("modal-box");
+    clearEl(box);
+    box.appendChild(el("div",{className:"font-game font-bold text-base mb-4",textContent:"✏️ Редактировать"}));
+    const {wrap:nw, input:nameInput} = buildModalInput("Название","text","",habit.name);
+    const {wrap:xw, input:xpInput} = buildModalInput("XP","number","",String(habit.xp),"1","200");
+    box.appendChild(nw); box.appendChild(xw);
+    const row = el("div",{className:"flex gap-2 mb-2"});
+    const cb = el("button",{className:"btn-secondary flex-1 py-2.5 text-sm",textContent:"Отмена"});
+    cb.addEventListener("click",closeModal);
+    const sb = el("button",{className:"btn-primary flex-1 py-2.5 text-sm",textContent:"Сохранить"});
+    sb.addEventListener("click",()=>withLock(async()=>{
+      const name=nameInput.value.trim(), xp=parseInt(xpInput.value,10);
+      if (!name){showToast("Введите название","error");return;}
+      if (!xp||xp<=0){showToast("XP должно быть > 0","error");return;}
+      const data=await apiPost("/api/habit/edit",{habit_id:habit.id,name,xp});
+      heroData=data.hero; heroLastFetch=Date.now(); renderHero(data.hero);
+      closeModal(); showToast("Обновлено!","success");
+    }));
+    row.appendChild(cb); row.appendChild(sb);
+    const del = el("button",{className:"w-full py-2.5 text-sm rounded-xl font-semibold",textContent:"🗑️ Удалить привычку",style:{background:"rgba(239,68,68,.15)",color:"#f87171",border:"1px solid rgba(239,68,68,.2)"}});
+    del.addEventListener("click",()=>withLock(async()=>{
+      const data=await apiPost("/api/habit/delete",{habit_id:habit.id});
+      heroData=data.hero; heroLastFetch=Date.now(); renderHero(data.hero);
+      closeModal(); showToast("Удалено","info");
+    }));
+    box.appendChild(row); box.appendChild(del);
+    openModal();
+  }
+
+  // ── BIO ──
+  function renderActivitySelector() {
+    const c = document.getElementById("activity-selector");
+    clearEl(c);
+    for (const opt of ACTIVITY_OPTIONS) {
+      const btn = el("button",{className:"btn-secondary p-3 text-left rounded-xl"});
+      const isActive = Math.abs(opt.value-selectedActivityFactor)<0.01;
+      if (isActive) { btn.style.borderColor="rgba(99,102,241,.6)"; btn.style.background="rgba(99,102,241,.15)"; }
+      btn.appendChild(el("div",{className:"text-sm font-semibold",textContent:opt.label}));
+      btn.appendChild(el("div",{className:"text-xs mt-0.5",textContent:opt.sub,style:{color:"var(--text-muted)"}}));
+      btn.addEventListener("click",()=>{selectedActivityFactor=opt.value;renderActivitySelector();updateWaterCalc();});
+      c.appendChild(btn);
+    }
+  }
+  function updateWaterCalc() {
+    const wi=document.getElementById("bio-weight"), ce=document.getElementById("bio-water-calc");
+    if (!wi||!ce) return;
+    const w=parseFloat(wi.value)||(heroData?heroData.weight:70);
+    ce.textContent = String(Math.max(1,Math.round(w*selectedActivityFactor/250)));
+  }
+
+  // ── ACCORDIONS ──
+  function setupAccordion(btnId, bodyId, arrowId) {
+    const btn=document.getElementById(btnId), body=document.getElementById(bodyId), arrow=document.getElementById(arrowId);
+    let open=false;
+    btn.addEventListener("click",()=>{
+      open=!open;
+      if (open) {
+        body.style.height=body.scrollHeight+"px";
+        arrow.style.transform="rotate(90deg)";
+      } else {
+        body.style.height="0px";
+        arrow.style.transform="rotate(0deg)";
+      }
+      setTimeout(()=>{ if(open) body.style.height=body.scrollHeight+"px"; },10);
+    });
+  }
+
+  // ── TABS ──
+  function switchTab(tab) {
+    currentTab=tab;
+    document.querySelectorAll(".tab-panel").forEach(p=>p.classList.add("hidden"));
+    document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
+    const panel=document.getElementById("tab-"+tab);
+    if (panel) panel.classList.remove("hidden");
+    const navBtn=document.querySelector(`.nav-btn[data-tab="${tab}"]`);
+    if (navBtn) navBtn.classList.add("active");
+    if (tab==="path"||tab==="bio"||tab==="shop") loadHero().catch(e=>showToast(e.message,"error"));
+    else if (tab==="journal") loadJournal();
+  }
+
+  // ── SPLASH ──
+  function showSplashError(msg) {
+    const s=document.getElementById("splash-status"), r=document.getElementById("splash-reload-btn"), l=document.getElementById("splash-loader");
+    if(s) s.textContent=msg;
+    if(l) l.style.display="none";
+    if(r) { r.classList.remove("hidden"); r.addEventListener("click",()=>location.reload(),{once:true}); }
+  }
+  function hideSplash() {
+    const splash=document.getElementById("splash");
+    if (splash) { splash.classList.add("hidden"); setTimeout(()=>splash.parentNode&&splash.parentNode.removeChild(splash),500); }
+    const app=document.getElementById("app");
+    if (app) app.classList.remove("hidden");
+  }
+
+  // ── MAIN INIT ──
+  async function init() {
+    // ⚡ CRITICAL: tg.ready() FIRST — hides Telegram's native loading spinner
+    if (tg) {
+      tg.ready();
+      initData = tg.initData || "";
+      try { tg.expand(); } catch(e) {}
+      try { if(tg.isVersionAtLeast&&tg.isVersionAtLeast("7.7")) tg.disableVerticalSwipes(); } catch(e) {}
+      try { tg.setBackgroundColor("#0c1017"); tg.setHeaderColor("#0c1017"); } catch(e) {}
+    } else {
+      initData = "dev_mode";
+    }
+
+    // Pre-populate heroData from mock so mockApiPost works immediately
+    heroData = JSON.parse(JSON.stringify(MOCK_HERO));
+
+    // Setup UI
+    setupAccordion("accordion-activity-btn","accordion-activity-body","arrow-activity");
+    setupAccordion("accordion-relations-btn","accordion-relations-body","arrow-relations");
+    setupAccordion("accordion-custom-btn","accordion-custom-body","arrow-custom");
+
+    document.querySelectorAll(".nav-btn").forEach(btn=>{
+      btn.addEventListener("click",()=>{ const t=btn.getAttribute("data-tab"); if(t) switchTab(t); });
+    });
+    document.getElementById("modal-overlay").addEventListener("click",e=>{ if(e.target===document.getElementById("modal-overlay")) closeModal(); });
+    const bw=document.getElementById("bio-weight");
+    bw.addEventListener("input",()=>{ bw.dataset.dirty="1"; updateWaterCalc(); });
+    document.getElementById("btn-water").addEventListener("click",()=>withLock(doAddWater));
+    document.getElementById("btn-sleep").addEventListener("click",()=>withLock(doSleep));
+    document.getElementById("btn-bio-save").addEventListener("click",()=>withLock(doSaveBio));
+    document.getElementById("btn-add-habit").addEventListener("click",openAddHabitModal);
+
+    document.addEventListener("visibilitychange",()=>{
+      if (!document.hidden&&(currentTab==="path"||currentTab==="shop")) loadHero().catch(()=>{});
+    });
+
+    // Load data
+    document.getElementById("splash-status").textContent = IS_DEV ? "Демо-режим..." : "Загрузка героя...";
+    try {
+      await loadHero(true);
+      renderActivitySelector();
+      hideSplash();
+      switchTab("path");
+    } catch(e) {
+      showSplashError("Ошибка соединения с сервером");
+    }
+  }
+
+  if (document.readyState==="loading") document.addEventListener("DOMContentLoaded",init);
+  else init();
+})();
+</script>
 </body>
 </html>
