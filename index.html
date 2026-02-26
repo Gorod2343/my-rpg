@@ -1,29 +1,165 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<meta http-equiv="Content-Security-Policy"
-content="
-default-src 'self';
-script-src https://telegram.org https://cdn.tailwindcss.com;
-style-src 'self' https://cdn.tailwindcss.com;
-connect-src 'self';
-frame-ancestors https://web.telegram.org;
-base-uri 'none';
-form-action 'self';
-">
-
-<title>Life RPG</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' https://telegram.org https://cdn.tailwindcss.com;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        font-src https://fonts.gstatic.com;
+        connect-src https://rpg-backend-yg16.onrender.com;
+        img-src 'self' data:;
+        frame-ancestors https://web.telegram.org https://t.me;
+        base-uri 'none';
+        form-action 'none';
+    ">
+    
+    <title>Life RPG</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0c1017; color: #f0f6fc; padding: 1rem; padding-bottom: 7rem; }
+        .prosto-card { background-color: #161b22; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1.5rem; }
+        .prosto-btn { background-color: #2563eb; color: white; border-radius: 1rem; transition: all 0.2s ease; font-weight: 700; }
+        .prosto-btn:active { transform: scale(0.97); background-color: #1d4ed8; }
+        .nav-active { color: #3b82f6; background-color: rgba(255, 255, 255, 0.05); }
+        .btn-loading { opacity: 0.6; pointer-events: none; transform: scale(0.98); }
+        .sleep-active { background-color: #1e3a8a !important; animation: pulse-blue 2s infinite; }
+        .done-task { opacity: 0.4; pointer-events: none; }
+        #splash-screen { transition: opacity 0.5s ease-out; }
+        @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); } 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); } }
+        .accordion-content { overflow: hidden; transition: max-height 0.4s ease-in-out; max-height: 0; }
+        .chevron { transition: transform 0.3s ease; }
+        .rotate-180 { transform: rotate(180deg); }
+        #editor-modal { transition: opacity 0.3s, transform 0.3s; opacity: 0; pointer-events: none; transform: translateY(20px); }
+        #editor-modal.active { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    </style>
 </head>
+<body class="antialiased">
 
-<body class="bg-[#0c1017] text-white">
+    <div id="splash-screen" class="fixed inset-0 bg-[#0c1017] z-[9999] flex flex-col items-center justify-center">
+        <p id="splash-text" class="text-blue-500 font-bold animate-pulse tracking-widest uppercase">Синхронизация...</p>
+        <button id="btn-splash-reload" class="hidden mt-6 px-6 py-3 bg-red-600/20 text-red-500 font-bold rounded-xl border border-red-500/50">Перезагрузить</button>
+    </div>
 
-<div id="app" class="p-4"></div>
+    <div class="flex justify-between items-center mb-8 pt-2">
+        <div class="flex items-center gap-3">
+            <div id="avatar-container" class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xl cursor-pointer"></div>
+            <div>
+                <h1 id="user-name" class="text-lg font-bold leading-tight">...</h1>
+                <p class="text-xs text-gray-400 mt-0.5">Всего XP: <span id="total-xp" class="text-white font-semibold">0</span></p>
+            </div>
+        </div>
+        <div class="text-right">
+            <div class="text-[10px] text-gray-400 font-bold uppercase mb-1 tracking-wider">Здоровье <span id="user-hp" class="text-white">100</span>%</div>
+            <div class="w-24 bg-[#0c1017] h-1.5 rounded-full border border-gray-800 overflow-hidden ml-auto">
+                <div id="hp-bar" class="bg-blue-500 h-full transition-all duration-700" style="width: 100%"></div>
+            </div>
+        </div>
+    </div>
 
-<script src="app.js"></script>
+    <div id="tab-tasks" class="tab-content space-y-6">
+        <div class="prosto-card p-6 text-center relative overflow-hidden">
+            <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">XP в этом месяце</p>
+            <h2 id="month-xp" class="text-5xl font-extrabold text-white">0</h2>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <div class="prosto-card p-4 flex flex-col justify-between min-h-[140px]">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-blue-400 text-[9px] font-bold uppercase">Вода</span>
+                    <span id="water-text" class="text-[10px] font-bold">0 / 8</span>
+                </div>
+                <button id="btn-drink-water" class="prosto-btn flex-1 shadow-lg shadow-blue-900/20 flex flex-col items-center justify-center gap-1">
+                    <span class="text-2xl">💧</span>
+                    <span class="text-[9px] uppercase tracking-tighter">Выпить</span>
+                </button>
+            </div>
+
+            <div class="prosto-card p-4 flex flex-col justify-between min-h-[140px]">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-indigo-400 text-[9px] font-bold uppercase">Сон</span>
+                    <span id="sleep-status" class="text-[9px] font-bold text-gray-500 uppercase tracking-tighter">Off</span>
+                </div>
+                <button id="btn-toggle-sleep" class="prosto-btn flex-1 shadow-lg shadow-indigo-900/20 flex flex-col items-center justify-center gap-1">
+                    <span id="sleep-icon" class="text-2xl">🌙</span>
+                    <span id="sleep-btn-text" class="text-[9px] uppercase tracking-tighter">Уснуть</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="prosto-card overflow-hidden">
+            <button id="btn-acc-sport" class="w-full p-5 flex justify-between items-center bg-[#161b22]">
+                <span class="font-bold">Активность</span>
+                <svg id="icon-sport" class="w-5 h-5 chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </button>
+            <div id="acc-sport" class="accordion-content bg-[#0c1017]/30 border-t border-gray-800/50"><div id="list-sport" class="p-2 space-y-1"></div></div>
+        </div>
+
+        <div class="prosto-card overflow-hidden">
+            <button id="btn-acc-family" class="w-full p-5 flex justify-between items-center bg-[#161b22]">
+                <span class="font-bold">Отношения</span>
+                <svg id="icon-family" class="w-5 h-5 chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </button>
+            <div id="acc-family" class="accordion-content bg-[#0c1017]/30 border-t border-gray-800/50"><div id="list-family" class="p-2 space-y-1"></div></div>
+        </div>
+
+        <div class="text-center mt-6">
+            <button id="btn-open-editor" class="text-xs text-gray-500 hover:text-blue-400 font-bold uppercase tracking-wider flex items-center justify-center w-full gap-2 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                Настроить списки дел
+            </button>
+        </div>
+    </div>
+
+    <div id="tab-calc" class="tab-content hidden space-y-6">
+        <h2 class="text-2xl font-black text-center mt-4">Биометрия</h2>
+        <div class="prosto-card p-6 space-y-5">
+            <div class="grid grid-cols-2 gap-4">
+                <div><label class="text-[10px] uppercase font-bold text-gray-400 block mb-2">Вес (кг)</label><input type="number" id="calc-weight" class="w-full bg-[#0c1017] border border-gray-800 rounded-xl p-3 text-white outline-none" placeholder="80"></div>
+                <div><label class="text-[10px] uppercase font-bold text-gray-400 block mb-2">Активность</label><select id="calc-activity" class="w-full bg-[#0c1017] border border-gray-800 rounded-xl p-3 text-sm text-white outline-none"><option value="30">Низкая</option><option value="35">Средняя</option><option value="40" selected>Высокая</option></select></div>
+            </div>
+            <div id="bmi-res" class="hidden bg-blue-900/20 p-4 rounded-xl text-sm font-bold text-blue-400"></div>
+            <button id="btn-apply-calc" class="w-full prosto-btn p-4 font-bold text-sm">Рассчитать и сохранить цель</button>
+        </div>
+    </div>
+    <div id="tab-shop" class="tab-content hidden space-y-6">
+        <div class="text-center mt-4"><h2 class="text-2xl font-bold mb-2">Награды</h2></div>
+        <div class="prosto-card p-6 text-center"><p class="text-gray-400 text-[10px] uppercase font-bold tracking-widest mb-1">Ваш баланс</p><h2 id="shop-balance" class="text-4xl font-extrabold text-blue-500">0 XP</h2></div>
+        <div id="shop-items" class="space-y-3"></div>
+    </div>
+    <div id="tab-history" class="tab-content hidden space-y-6">
+        <div class="text-center mt-4"><h2 class="text-2xl font-bold mb-2">История событий</h2></div>
+        <div id="history-list" class="space-y-3"></div>
+    </div>
+
+    <div id="editor-modal" class="fixed inset-0 bg-[#0c1017] z-[10000] p-4 overflow-y-auto">
+        <div class="flex justify-between items-center mb-6 pt-2"><h2 class="text-xl font-bold">Настройка дел</h2><button id="btn-close-editor" class="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center font-bold text-gray-400">✕</button></div>
+        <div class="prosto-card p-5 mb-6 space-y-3">
+            <input type="text" id="new-h-name" placeholder="Название" class="w-full bg-[#0c1017] border border-gray-800 rounded-xl p-3 text-white outline-none">
+            <div class="grid grid-cols-2 gap-3">
+                <select id="new-h-cat" class="w-full bg-[#0c1017] border border-gray-800 rounded-xl p-3 text-white outline-none"><option value="sport">💪 Спорт</option><option value="family">❤️ Семья</option></select>
+                <input type="number" id="new-h-xp" placeholder="XP" min="1" class="w-full bg-[#0c1017] border border-gray-800 rounded-xl p-3 text-white outline-none">
+            </div>
+            <button id="btn-add-habit" class="w-full prosto-btn p-3 font-bold mt-2">Добавить в список</button>
+        </div>
+        <div id="editor-list" class="space-y-2 mb-24"></div>
+        <button id="btn-save-habits" class="w-full bg-blue-600 text-white rounded-xl p-4 font-bold text-sm fixed bottom-6 left-4 right-4 max-w-md mx-auto shadow-2xl">Сохранить для профиля</button>
+    </div>
+
+    <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md bg-[#161b22]/95 backdrop-blur-xl border border-gray-800 rounded-[2rem] p-2 flex justify-around shadow-2xl z-50">
+        <button id="nav-tasks" class="flex-1 py-3 rounded-2xl nav-active text-[9px] font-black uppercase">Путь</button>
+        <button id="nav-calc" class="flex-1 py-3 rounded-2xl text-gray-500 text-[9px] font-black uppercase">Био</button>
+        <button id="nav-shop" class="flex-1 py-3 rounded-2xl text-gray-500 text-[9px] font-black uppercase">Маг</button>
+        <button id="nav-history" class="flex-1 py-3 rounded-2xl text-gray-500 text-[9px] font-black uppercase">Жур</button>
+    </nav>
+
+    <script src="app.js" defer></script>
 </body>
 </html>
