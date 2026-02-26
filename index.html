@@ -1,46 +1,29 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="
-        default-src 'self';
-        script-src 'self' https://telegram.org https://cdn.tailwindcss.com;
-        style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com;
-        font-src 'self';
-        img-src 'self' data:;
-        frame-ancestors https://telegram.org;
-    ">
-    <title>Life RPG</title>
-    <!-- Tailwind via CDN (allowed by CSP) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Telegram WebApp SDK -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Our app logic -->
-    <script src="app.js" defer></script>
-    <style>
-        /* Additional custom styles if needed */
-        .accordion-content {
-            transition: max-height 0.3s ease-out;
-            overflow: hidden;
-            max-height: 0;
-        }
-        .accordion-content.open {
-            max-height: 500px; /* will be set by JS dynamically, but fallback */
-        }
-        .pulse-shadow {
-            animation: pulse-shadow 2s infinite;
-        }
-        @keyframes pulse-shadow {
-            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta http-equiv="Content-Security-Policy"
+content="
+default-src 'self';
+script-src https://telegram.org https://cdn.tailwindcss.com;
+style-src 'self' https://cdn.tailwindcss.com;
+connect-src 'self';
+frame-ancestors https://web.telegram.org;
+base-uri 'none';
+form-action 'self';
+">
+
+<title>Life RPG</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-[#0c1017] text-gray-200 font-sans antialiased">
-    <div id="app" class="container mx-auto px-4 pb-24 pt-4 max-w-lg">
-        <!-- Dynamic content will be injected by app.js -->
-    </div>
+
+<body class="bg-[#0c1017] text-white">
+
+<div id="app" class="p-4"></div>
+
+<script src="app.js"></script>
 </body>
 </html>
